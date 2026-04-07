@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.facturapi.FacturapiException;
+import io.facturapi.models.ApiError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -146,21 +147,7 @@ public final class FacturapiHttpClient {
           responseBytes = errorStream == null ? new byte[0] : errorStream.readAllBytes();
         }
         String bodyText = responseBytes.length == 0 ? "" : new String(responseBytes, StandardCharsets.UTF_8);
-        String message = "Request failed with status " + statusCode;
-        try {
-          JsonNode error = objectMapper.readTree(bodyText);
-          JsonNode messageNode = firstDefined(error, "message", "error", "detail");
-          if (messageNode != null && messageNode.isTextual()) {
-            message = messageNode.asText();
-          } else if (!bodyText.isEmpty()) {
-            message = bodyText;
-          }
-        } catch (Exception ignored) {
-          if (!bodyText.isEmpty()) {
-            message = bodyText;
-          }
-        }
-        throw new FacturapiException(message, statusCode, bodyText);
+        throw new FacturapiException(parseApiError(bodyText, statusCode), bodyText);
       }
       return response.body();
     } catch (IOException e) {
@@ -215,6 +202,66 @@ public final class FacturapiHttpClient {
     return null;
   }
 
+  private ApiError parseApiError(String bodyText, int statusCode) {
+    ApiError apiError = null;
+    if (bodyText != null && !bodyText.isBlank()) {
+      try {
+        apiError = objectMapper.readValue(bodyText, ApiError.class);
+      } catch (Exception ignored) {
+        try {
+          JsonNode error = objectMapper.readTree(bodyText);
+          apiError = new ApiError();
+
+          JsonNode messageNode = firstDefined(error, "message", "error", "detail");
+          if (messageNode != null && messageNode.isTextual()) {
+            apiError.setMessage(messageNode.asText());
+          } else {
+            apiError.setMessage(bodyText);
+          }
+
+          JsonNode statusNode = firstDefined(error, "status");
+          if (statusNode != null) {
+            apiError.setStatus(statusNode);
+          }
+
+          JsonNode codeNode = firstDefined(error, "code");
+          if (codeNode != null) {
+            apiError.setCode(codeNode);
+          }
+
+          JsonNode pathNode = firstDefined(error, "path");
+          if (pathNode != null && pathNode.isTextual()) {
+            apiError.setPath(pathNode.asText());
+          }
+
+          JsonNode okNode = firstDefined(error, "ok");
+          if (okNode != null && okNode.isBoolean()) {
+            apiError.setOk(okNode.asBoolean());
+          }
+        } catch (Exception secondaryIgnored) {
+          apiError = new ApiError();
+          apiError.setMessage(bodyText.isBlank() ? "Request failed with status " + statusCode : bodyText);
+        }
+      }
+    }
+
+    if (apiError == null) {
+      apiError = new ApiError();
+      apiError.setMessage("Request failed with status " + statusCode);
+    }
+
+    if (apiError.getMessage() == null || apiError.getMessage().isBlank()) {
+      apiError.setMessage("Request failed with status " + statusCode);
+    }
+    if (apiError.getStatus() == null) {
+      apiError.setStatus(statusCode);
+    }
+    if (!apiError.isOk()) {
+      apiError.setOk(false);
+    }
+    return apiError;
+  }
+
   private HttpRequest buildRequest(
     String method,
     String path,
@@ -248,21 +295,7 @@ public final class FacturapiHttpClient {
     int statusCode = response.statusCode();
     if (statusCode < 200 || statusCode >= 300) {
       String bodyText = response.body() == null ? "" : new String(response.body(), StandardCharsets.UTF_8);
-      String message = "Request failed with status " + statusCode;
-      try {
-        JsonNode error = objectMapper.readTree(bodyText);
-        JsonNode messageNode = firstDefined(error, "message", "error", "detail");
-        if (messageNode != null && messageNode.isTextual()) {
-          message = messageNode.asText();
-        } else if (!bodyText.isEmpty()) {
-          message = bodyText;
-        }
-      } catch (Exception ignored) {
-        if (!bodyText.isEmpty()) {
-          message = bodyText;
-        }
-      }
-      throw new FacturapiException(message, statusCode, bodyText);
+      throw new FacturapiException(parseApiError(bodyText, statusCode), bodyText);
     }
   }
 
