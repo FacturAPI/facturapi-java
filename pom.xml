@@ -5,7 +5,7 @@
 
   <groupId>io.facturapi</groupId>
   <artifactId>facturapi-java</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <name>facturapi-java</name>
   <description>Official Java SDK for Facturapi</description>
   <url>https://github.com/facturapi/facturapi-java</url>
@@ -22,7 +22,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jackson.version>2.17.2</jackson.version>
     <junit.version>5.11.0</junit.version>
-    <okhttp.version>4.12.0</okhttp.version>
   </properties>
 
   <dependencies>
@@ -36,12 +35,6 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>${junit.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.squareup.okhttp3</groupId>
-      <artifactId>mockwebserver</artifactId>
-      <version>${okhttp.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
