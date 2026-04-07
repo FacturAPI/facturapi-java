@@ -17,6 +17,8 @@ jobs:
       CENTRAL_TOKEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
       CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      CENTRAL_GROUP_ID: io.facturapi
+      CENTRAL_ARTIFACT_ID: facturapi-java
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,8 +42,11 @@ jobs:
           set -euo pipefail
 
           python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import base64
+          import os
           import sys
           import urllib.request
+          import urllib.error
           import xml.etree.ElementTree as ET
 
           ns = {"m": "http://maven.apache.org/POM/4.0.0"}
@@ -89,10 +94,38 @@ jobs:
               return left_pre > right_pre
 
           publish = is_greater(version, latest)
+          reason = "current version is newer than published version"
+          if publish:
+              # If a deployment for this exact version is already staged/ongoing in the Portal,
+              # skip a duplicate publish attempt and leave the workflow green.
+              username = os.environ.get("CENTRAL_TOKEN_USERNAME", "")
+              password = os.environ.get("CENTRAL_TOKEN_PASSWORD", "")
+              group_id = os.environ.get("CENTRAL_GROUP_ID", "io.facturapi")
+              artifact_id = os.environ.get("CENTRAL_ARTIFACT_ID", "facturapi-java")
+              if username and password:
+                  token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("utf-8")
+                  rel_path = f"{group_id.replace('.', '/')}/{artifact_id}/{version}/{artifact_id}-{version}.pom"
+                  url = f"https://central.sonatype.com/api/v1/publisher/deployments/download/{rel_path}"
+                  req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"}, method="HEAD")
+                  try:
+                      with urllib.request.urlopen(req, timeout=20) as response:
+                          if response.status == 200:
+                              publish = False
+                              reason = "version already staged or publishing in Central Portal"
+                  except urllib.error.HTTPError as err:
+                      if err.code != 404:
+                          print(f"portal_stage_check_status={err.code}")
+                  except Exception:
+                      pass
+
           print(f"current_version={version}")
           print(f"latest_version={latest}")
           print(f"publish={'true' if publish else 'false'}")
-          print(f"reason={'current version is newer than published version' if publish else 'published version is current or newer'}")
+          if publish:
+              reason = "current version is newer than published version"
+          elif reason == "current version is newer than published version":
+              reason = "published version is current or newer"
+          print(f"reason={reason}")
           PY
 
       - name: Publish
