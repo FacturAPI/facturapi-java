@@ -1,55 +1,37 @@
 package io.facturapi;
 
-import io.facturapi.models.ApiError;
-
 public class FacturapiException extends RuntimeException {
-  private final ApiError apiError;
   private final int statusCode;
-  private final String responseBody;
+  private final Object errorCode;
+  private final String errorPath;
 
   public FacturapiException(String message) {
-    super(message);
-    this.apiError = null;
-    this.statusCode = -1;
-    this.responseBody = null;
+    this(message, -1, null, null);
   }
 
   public FacturapiException(String message, Throwable cause) {
     super(message, cause);
-    this.apiError = null;
     this.statusCode = -1;
-    this.responseBody = null;
+    this.errorCode = null;
+    this.errorPath = null;
   }
 
-  public FacturapiException(String message, int statusCode, String responseBody) {
+  public FacturapiException(String message, int statusCode, Object errorCode, String errorPath) {
     super(message);
-    this.apiError = null;
     this.statusCode = statusCode;
-    this.responseBody = responseBody;
-  }
-
-  public FacturapiException(ApiError apiError, String responseBody) {
-    super(apiError != null && apiError.getMessage() != null && !apiError.getMessage().isBlank()
-      ? apiError.getMessage()
-      : "An error occurred");
-    this.apiError = apiError;
-    this.statusCode = apiError != null && apiError.getStatus() != null ? apiError.getStatus() : -1;
-    this.responseBody = responseBody;
+    this.errorCode = errorCode;
+    this.errorPath = errorPath;
   }
 
   public int getStatusCode() {
     return statusCode;
   }
 
-  public String getResponseBody() {
-    return responseBody;
+  public Object getErrorCode() {
+    return errorCode;
   }
 
-  public ApiError getApiError() {
-    return apiError;
-  }
-
-  public ApiError getError() {
-    return apiError;
+  public String getErrorPath() {
+    return errorPath;
   }
 }

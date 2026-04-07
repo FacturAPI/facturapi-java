@@ -78,13 +78,9 @@ try {
   facturapi.customers().retrieve("cus_123");
 } catch (FacturapiException e) {
   System.out.println(e.getMessage());
-
-  var apiError = e.getApiError();
-  if (apiError != null) {
-    System.out.println(apiError.getStatus());
-    System.out.println(apiError.getCode());
-    System.out.println(apiError.getPath());
-  }
+  System.out.println(e.getStatusCode());
+  System.out.println(e.getErrorCode());
+  System.out.println(e.getErrorPath());
 }
 ```
 
@@ -92,7 +88,7 @@ try {
 
 - Inputs use flexible JSON dictionaries (`Map<String, Object>`).
 - Outputs are typed Java models (`Invoice`, `Customer`, `SearchResult<T>`, etc.).
-- Errors expose the API error payload when the response body is JSON.
+- Errors expose the useful API error fields directly on `FacturapiException`.
 - Auth uses `Authorization: Bearer <apiKey>`.
 
 ## Configuration

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.facturapi.FacturapiException;
-import io.facturapi.models.ApiError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -147,7 +146,7 @@ public final class FacturapiHttpClient {
           responseBytes = errorStream == null ? new byte[0] : errorStream.readAllBytes();
         }
         String bodyText = responseBytes.length == 0 ? "" : new String(responseBytes, StandardCharsets.UTF_8);
-        throw new FacturapiException(parseApiError(bodyText, statusCode), bodyText);
+        throw buildApiException(bodyText, statusCode);
       }
       return response.body();
     } catch (IOException e) {
@@ -202,64 +201,67 @@ public final class FacturapiHttpClient {
     return null;
   }
 
-  private ApiError parseApiError(String bodyText, int statusCode) {
-    ApiError apiError = null;
+  private FacturapiException buildApiException(String bodyText, int statusCode) {
+    int resolvedStatus = statusCode;
+    Object errorCode = null;
+    String errorPath = null;
+    String message = "Request failed with status " + statusCode;
+
     if (bodyText != null && !bodyText.isBlank()) {
       try {
-        apiError = objectMapper.readValue(bodyText, ApiError.class);
-      } catch (Exception ignored) {
-        try {
-          JsonNode error = objectMapper.readTree(bodyText);
-          apiError = new ApiError();
-
-          JsonNode messageNode = firstDefined(error, "message", "error", "detail");
+        JsonNode root = objectMapper.readTree(bodyText);
+        if (root != null) {
+          JsonNode messageNode = firstDefined(root, "message", "error", "detail");
           if (messageNode != null && messageNode.isTextual()) {
-            apiError.setMessage(messageNode.asText());
+            message = messageNode.asText();
+          } else if (root.isTextual()) {
+            message = root.asText();
           } else {
-            apiError.setMessage(bodyText);
+            message = bodyText;
           }
 
-          JsonNode statusNode = firstDefined(error, "status");
+          JsonNode statusNode = firstDefined(root, "status");
           if (statusNode != null) {
-            apiError.setStatus(statusNode);
+            if (statusNode.isIntegralNumber()) {
+              resolvedStatus = statusNode.intValue();
+            } else if (statusNode.isNumber()) {
+              resolvedStatus = (int) Math.round(statusNode.asDouble());
+            } else if (statusNode.isTextual()) {
+              try {
+                resolvedStatus = Integer.parseInt(statusNode.asText());
+              } catch (NumberFormatException ignored) {
+                resolvedStatus = statusCode;
+              }
+            }
           }
 
-          JsonNode codeNode = firstDefined(error, "code");
-          if (codeNode != null) {
-            apiError.setCode(codeNode);
+          JsonNode codeNode = firstDefined(root, "code");
+          if (codeNode != null && !codeNode.isNull()) {
+            if (codeNode.isTextual()) {
+              errorCode = codeNode.asText();
+            } else if (codeNode.isIntegralNumber()) {
+              errorCode = codeNode.intValue();
+            } else if (codeNode.isNumber()) {
+              errorCode = codeNode.numberValue();
+            } else if (codeNode.isBoolean()) {
+              errorCode = codeNode.asBoolean();
+            } else {
+              errorCode = codeNode.toString();
+            }
           }
 
-          JsonNode pathNode = firstDefined(error, "path");
+          JsonNode pathNode = firstDefined(root, "path");
           if (pathNode != null && pathNode.isTextual()) {
-            apiError.setPath(pathNode.asText());
+            errorPath = pathNode.asText();
           }
 
-          JsonNode okNode = firstDefined(error, "ok");
-          if (okNode != null && okNode.isBoolean()) {
-            apiError.setOk(okNode.asBoolean());
-          }
-        } catch (Exception secondaryIgnored) {
-          apiError = new ApiError();
-          apiError.setMessage(bodyText.isBlank() ? "Request failed with status " + statusCode : bodyText);
         }
+      } catch (Exception ignored) {
+        message = bodyText.isBlank() ? message : bodyText;
       }
     }
 
-    if (apiError == null) {
-      apiError = new ApiError();
-      apiError.setMessage("Request failed with status " + statusCode);
-    }
-
-    if (apiError.getMessage() == null || apiError.getMessage().isBlank()) {
-      apiError.setMessage("Request failed with status " + statusCode);
-    }
-    if (apiError.getStatus() == null) {
-      apiError.setStatus(statusCode);
-    }
-    if (!apiError.isOk()) {
-      apiError.setOk(false);
-    }
-    return apiError;
+    return new FacturapiException(message, resolvedStatus, errorCode, errorPath);
   }
 
   private HttpRequest buildRequest(
@@ -295,7 +297,7 @@ public final class FacturapiHttpClient {
     int statusCode = response.statusCode();
     if (statusCode < 200 || statusCode >= 300) {
       String bodyText = response.body() == null ? "" : new String(response.body(), StandardCharsets.UTF_8);
-      throw new FacturapiException(parseApiError(bodyText, statusCode), bodyText);
+      throw buildApiException(bodyText, statusCode);
     }
   }
 
