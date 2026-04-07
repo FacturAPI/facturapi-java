@@ -7,13 +7,9 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SelfInvoiceSettings {
-  @JsonProperty("allowed_cfdi_uses")
   private List<String> allowedCfdiUses = new ArrayList<>();
-  @JsonProperty("apply_resico_isr")
   private Boolean applyResicoIsr;
-  @JsonProperty("support_email")
   private String supportEmail;
-  @JsonProperty("support_email_verified")
   private Boolean supportEmailVerified;
 
   public List<String> getAllowedCfdiUses() { return allowedCfdiUses; }

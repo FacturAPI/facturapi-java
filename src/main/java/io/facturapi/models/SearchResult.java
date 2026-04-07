@@ -9,12 +9,9 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchResult<T> {
   private Integer page;
-  @JsonProperty("total_pages")
   private Integer totalPages;
-  @JsonProperty("total_results")
   @JsonAlias({"total"})
   private Integer totalResults;
-  @JsonProperty("has_more")
   private Boolean hasMore;
   private List<T> data = new ArrayList<>();
 

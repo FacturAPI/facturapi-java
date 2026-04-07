@@ -6,11 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaEmisor {
   private String curp;
-  @JsonProperty("registro_patronal")
   private String registroPatronal;
-  @JsonProperty("rfc_patron_origen")
   private String rfcPatronOrigen;
-  @JsonProperty("entidad_sncf")
   private NominaEntidadSncf entidadSncf;
 
   public String getCurp() { return curp; }

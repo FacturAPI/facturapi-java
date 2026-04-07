@@ -10,7 +10,6 @@ public class CatalogItem {
   private String code;
   @JsonAlias({"label", "description", "name"})
   private String label;
-  @JsonProperty("score")
   private Double score;
 
   public String getCode() {

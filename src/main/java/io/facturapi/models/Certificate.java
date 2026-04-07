@@ -6,13 +6,9 @@ import java.time.Instant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Certificate {
-  @JsonProperty("has_certificate")
   private Boolean hasCertificate;
-  @JsonProperty("updated_at")
   private Instant updatedAt;
-  @JsonProperty("expires_at")
   private Instant expiresAt;
-  @JsonProperty("serial_number")
   private String serialNumber;
 
   public Boolean getHasCertificate() { return hasCertificate; }

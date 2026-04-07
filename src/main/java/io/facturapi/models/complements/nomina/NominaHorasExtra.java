@@ -6,11 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaHorasExtra {
   private Integer dias;
-  @JsonProperty("tipo_horas")
   private String tipoHoras;
-  @JsonProperty("horas_extra")
   private Integer horasExtra;
-  @JsonProperty("importe_pagado")
   private Double importePagado;
 
   public Integer getDias() { return dias; }

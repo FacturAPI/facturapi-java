@@ -9,11 +9,9 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Webhook {
   private String id;
-  @JsonProperty("created_at")
   private Instant createdAt;
   private String organization;
   private Boolean livemode;
-  @JsonProperty("enabled_events")
   private List<String> enabledEvents = new ArrayList<>();
   private String description;
   private String url;

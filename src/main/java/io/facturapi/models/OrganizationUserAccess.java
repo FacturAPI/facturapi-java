@@ -9,17 +9,13 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrganizationUserAccess {
   private String id;
-  @JsonProperty("full_name")
   private String fullName;
   private String email;
   private String role;
-  @JsonProperty("role_name")
   private String roleName;
   private String organization;
   private List<String> operations = new ArrayList<>();
-  @JsonProperty("created_at")
   private Instant createdAt;
-  @JsonProperty("updated_at")
   private Instant updatedAt;
 
   public String getId() { return id; }

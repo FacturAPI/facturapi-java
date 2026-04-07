@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiEvent {
-  @JsonProperty("created_at")
   private Instant createdAt;
   private String organization;
   private Boolean livemode;

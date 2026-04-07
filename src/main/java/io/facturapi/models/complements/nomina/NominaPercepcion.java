@@ -7,17 +7,12 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaPercepcion {
-  @JsonProperty("tipo_percepcion")
   private String tipoPercepcion;
   private String concepto;
   private String clave;
-  @JsonProperty("importe_gravado")
   private Double importeGravado;
-  @JsonProperty("importe_exento")
   private Double importeExento;
-  @JsonProperty("acciones_o_titulos")
   private NominaAcciones accionesOTitulos;
-  @JsonProperty("horas_extra")
   private List<NominaHorasExtra> horasExtra = new ArrayList<>();
 
   public String getTipoPercepcion() { return tipoPercepcion; }

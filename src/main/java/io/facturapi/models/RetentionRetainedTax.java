@@ -5,14 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RetentionRetainedTax {
-  @JsonProperty("base_ret")
   private Double baseRet;
   private String impuesto;
-  @JsonProperty("tipo_pago_ret")
   private String tipoPagoRet;
-  @JsonProperty("monto_ret")
   private Double montoRet;
-  @JsonProperty("pago_provisional")
   private Boolean pagoProvisional;
 
   public Double getBaseRet() { return baseRet; }

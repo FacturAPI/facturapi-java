@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class XmlNamespace {
   private String prefix;
   private String uri;
-  @JsonProperty("schema_location")
   private String schemaLocation;
 
   public String getPrefix() { return prefix; }

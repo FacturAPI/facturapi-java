@@ -9,16 +9,12 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrganizationInvite {
   private String id;
-  @JsonProperty("created_at")
   private Instant createdAt;
   private String email;
-  @JsonProperty("organization_name")
   private String organizationName;
   private String role;
-  @JsonProperty("role_name")
   private String roleName;
   private List<String> roles = new ArrayList<>();
-  @JsonProperty("expires_at")
   private Instant expiresAt;
   private String status;
 

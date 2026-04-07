@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaEntidadSncf {
-  @JsonProperty("origen_recurso")
   private String origenRecurso;
-  @JsonProperty("monto_recurso_propio")
   private Double montoRecursoPropio;
 
   public String getOrigenRecurso() { return origenRecurso; }

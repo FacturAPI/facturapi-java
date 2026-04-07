@@ -8,11 +8,8 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Customization {
   private String color;
-  @JsonProperty("pdf_extra")
   private PdfExtra pdfExtra;
-  @JsonProperty("default_series")
   private Map<String, String> defaultSeries = new HashMap<>();
-  @JsonProperty("has_logo")
   private Boolean hasLogo;
 
   public String getColor() { return color; }

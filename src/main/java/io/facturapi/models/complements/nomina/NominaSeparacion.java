@@ -5,15 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaSeparacion {
-  @JsonProperty("total_pagado")
   private Double totalPagado;
-  @JsonProperty("num_anos_servicio")
   private Integer numAnosServicio;
-  @JsonProperty("ultimo_sueldo_mens_ord")
   private Double ultimoSueldoMensOrd;
-  @JsonProperty("ingreso_acumulable")
   private Double ingresoAcumulable;
-  @JsonProperty("ingreso_no_acumulable")
   private Double ingresoNoAcumulable;
 
   public Double getTotalPagado() { return totalPagado; }

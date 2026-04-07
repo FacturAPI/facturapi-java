@@ -10,13 +10,10 @@ public class InvoiceItem {
   private Double quantity;
   private ProductInfo product;
   private Double discount;
-  @JsonProperty("customs_keys")
   private List<String> customsKeys = new ArrayList<>();
-  @JsonProperty("third_party")
   private InvoiceItemThirdParty thirdParty;
   private String complement;
   private List<InvoiceItemPart> parts = new ArrayList<>();
-  @JsonProperty("property_tax_account")
   private String propertyTaxAccount;
 
   public Double getQuantity() { return quantity; }

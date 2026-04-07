@@ -7,7 +7,6 @@ import java.time.Instant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PendingPlanUpdate {
   private String plan;
-  @JsonProperty("scheduled_for")
   private Instant scheduledFor;
 
   public String getPlan() { return plan; }

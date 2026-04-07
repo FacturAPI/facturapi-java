@@ -10,7 +10,6 @@ public class ApiKey {
   private String id;
   @JsonProperty("first_12")
   private String first12;
-  @JsonProperty("created_at")
   private Instant createdAt;
   @JsonAlias({"key", "api_key", "token"})
   private String key;

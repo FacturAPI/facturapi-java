@@ -9,7 +9,6 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Payment {
-  @JsonProperty("payment_form")
   private PaymentForm paymentForm;
   private String currency;
   private Double exchange;

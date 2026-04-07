@@ -9,38 +9,24 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaReceptor {
   private String curp;
-  @JsonProperty("num_seguridad_social")
   private String numSeguridadSocial;
-  @JsonProperty("fecha_inicio_rel_laboral")
   private LocalDate fechaInicioRelLaboral;
   private Object antiguedad;
-  @JsonProperty("tipo_contrato")
   private String tipoContrato;
   private Boolean sindicalizado;
-  @JsonProperty("tipo_jornada")
   private String tipoJornada;
-  @JsonProperty("tipo_regimen")
   private String tipoRegimen;
-  @JsonProperty("num_empleado")
   private String numEmpleado;
   private String departamento;
   private String puesto;
-  @JsonProperty("riesgo_puesto")
   private String riesgoPuesto;
-  @JsonProperty("periodicidad_pago")
   private String periodicidadPago;
   private String banco;
-  @JsonProperty("nombre_banco")
   private String nombreBanco;
-  @JsonProperty("cuenta_bancaria")
   private String cuentaBancaria;
-  @JsonProperty("salario_base_cot_apor")
   private Double salarioBaseCotApor;
-  @JsonProperty("salario_diario_integrado")
   private Double salarioDiarioIntegrado;
-  @JsonProperty("clave_ent_fed")
   private String claveEntFed;
-  @JsonProperty("sub_contratacion")
   private List<NominaSubcontratacion> subContratacion = new ArrayList<>();
 
   public String getCurp() { return curp; }

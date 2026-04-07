@@ -7,11 +7,8 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaPercepciones {
-  @JsonProperty("percepcion")
   private List<NominaPercepcion> percepcion = new ArrayList<>();
-  @JsonProperty("jubilacion_pension_retiro")
   private NominaJubilacion jubilacionPensionRetiro;
-  @JsonProperty("separacion_indemnizacion")
   private NominaSeparacion separacionIndemnizacion;
 
   public List<NominaPercepcion> getPercepcion() { return percepcion; }

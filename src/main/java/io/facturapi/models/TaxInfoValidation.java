@@ -8,7 +8,6 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TaxInfoValidation {
-  @JsonProperty("is_valid")
   @JsonAlias({"valid"})
   private Boolean isValid;
   private List<TaxInfoValidationError> errors = new ArrayList<>();

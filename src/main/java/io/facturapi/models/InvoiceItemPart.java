@@ -6,13 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InvoiceItemPart {
   private Double quantity;
-  @JsonProperty("product_key")
   private String productKey;
   private String description;
-  @JsonProperty("unit_name")
   private String unitName;
   private String sku;
-  @JsonProperty("unit_price")
   private Double unitPrice;
 
   public Double getQuantity() { return quantity; }

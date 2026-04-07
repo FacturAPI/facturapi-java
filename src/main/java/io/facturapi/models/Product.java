@@ -12,20 +12,14 @@ public class Product {
   private String id;
   private String organization;
   private Boolean livemode;
-  @JsonProperty("product_key")
   private String productKey;
   private String description;
   private Double price;
-  @JsonProperty("created_at")
   private Instant createdAt;
-  @JsonProperty("tax_included")
   private Boolean taxIncluded;
   private List<Tax> taxes = new ArrayList<>();
-  @JsonProperty("local_taxes")
   private List<LocalTax> localTaxes = new ArrayList<>();
-  @JsonProperty("unit_key")
   private String unitKey;
-  @JsonProperty("unit_name")
   private String unitName;
   private String sku;
   private Taxability taxability;

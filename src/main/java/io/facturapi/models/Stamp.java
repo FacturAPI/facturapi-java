@@ -7,14 +7,10 @@ import java.time.Instant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Stamp {
   private Instant date;
-  @JsonProperty("sat_signature")
   private String satSignature;
-  @JsonProperty("sat_cert_number")
   private String satCertNumber;
   private String signature;
-  @JsonProperty("complement_string")
   private String complementString;
-  @JsonProperty("rfc_provider_cert")
   private String rfcProviderCert;
 
   public Instant getDate() { return date; }

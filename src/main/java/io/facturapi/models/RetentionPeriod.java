@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RetentionPeriod {
-  @JsonProperty("mes_ini")
   private Integer mesIni;
-  @JsonProperty("mes_fin")
   private Integer mesFin;
   private Integer ejerc;
 

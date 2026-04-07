@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PaymentRelated {
   private String uuid;
-  @JsonProperty("installment")
   private Integer installment;
-  @JsonProperty("last_balance")
   private Double lastBalance;
   private Double amount;
   private String currency;

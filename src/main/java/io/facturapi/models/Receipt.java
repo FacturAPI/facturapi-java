@@ -10,32 +10,24 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Receipt {
   private String id;
-  @JsonProperty("created_at")
   private Instant createdAt;
   private Instant date;
-  @JsonProperty("api_version")
   private Integer apiVersion;
   private Boolean livemode;
   private String organization;
-  @JsonProperty("folio_number")
   private Integer folioNumber;
-  @JsonProperty("external_id")
   private String externalId;
-  @JsonProperty("idempotency_key")
   private String idempotencyKey;
   private String branch;
-  @JsonProperty("payment_form")
   private PaymentForm paymentForm;
   private List<InvoiceItem> items = new ArrayList<>();
   private String currency;
   private Double exchange;
   private Double total;
   private String invoice;
-  @JsonProperty("expires_at")
   private Instant expiresAt;
   private String key;
   private String status;
-  @JsonProperty("self_invoice_url")
   private String selfInvoiceUrl;
 
   public String getId() { return id; }

@@ -9,27 +9,18 @@ public class Customer {
   private String id;
   private String organization;
   private Boolean livemode;
-  @JsonProperty("created_at")
   private Instant createdAt;
-  @JsonProperty("tax_id")
   private String taxId;
-  @JsonProperty("tax_system")
   private String taxSystem;
-  @JsonProperty("legal_name")
   private String legalName;
   private String email;
   private String phone;
   private String curp;
   private Address address;
-  @JsonProperty("external_id")
   private String externalId;
-  @JsonProperty("default_invoice_use")
   private String defaultInvoiceUse;
-  @JsonProperty("sat_validated_at")
   private Instant satValidatedAt;
-  @JsonProperty("edit_link")
   private String editLink;
-  @JsonProperty("edit_link_expires_at")
   private Instant editLinkExpiresAt;
 
   public String getId() { return id; }

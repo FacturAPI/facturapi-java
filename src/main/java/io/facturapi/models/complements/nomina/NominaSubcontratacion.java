@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaSubcontratacion {
-  @JsonProperty("rfc_labora")
   private String rfcLabora;
-  @JsonProperty("porcentaje_tiempo")
   private Double porcentajeTiempo;
 
   public String getRfcLabora() { return rfcLabora; }

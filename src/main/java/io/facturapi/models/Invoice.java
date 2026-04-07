@@ -18,20 +18,14 @@ public class Invoice {
   private String id;
   private String organization;
   private Boolean livemode;
-  @JsonProperty("created_at")
   private Instant createdAt;
   private Instant date;
-  @JsonProperty("issuer_type")
   private IssuingType issuerType;
   private InvoiceType type;
   private InvoiceStatus status;
-  @JsonProperty("cfdi_version")
   private Integer cfdiVersion;
-  @JsonProperty("issuer_info")
   private CustomerInfo issuerInfo;
-  @JsonProperty("payment_form")
   private PaymentForm paymentForm;
-  @JsonProperty("payment_method")
   private PaymentMethod paymentMethod;
   private String currency;
   private Double exchange;
@@ -39,41 +33,30 @@ public class Invoice {
   private CustomerInfo customer;
   private Double total;
   private String use;
-  @JsonProperty("folio_number")
   private String folioNumber;
   private String series;
   @JsonProperty("is_ready_to_stamp")
   private Boolean readyToStamp;
   private List<InvoiceItem> items = new ArrayList<>();
   private Address address;
-  @JsonProperty("amount_due")
   private Double amountDue;
-  @JsonProperty("verification_url")
   private String verificationUrl;
-  @JsonProperty("verification_carta_porte")
   private String verificationCartaPorte;
-  @JsonProperty("cancellation_status")
   private CancellationStatus cancellationStatus;
-  @JsonProperty("external_id")
   private String externalId;
-  @JsonProperty("idempotency_key")
   private String idempotencyKey;
   private Stamp stamp;
   private String addenda;
   private String conditions;
-  @JsonProperty("pdf_custom_section")
   private String pdfCustomSection;
   @JsonProperty("export")
   private String exportReference;
   private GlobalInfo global;
   private InvoiceCancellation cancellation;
   private List<InvoiceComplement> complements = new ArrayList<>();
-  @JsonProperty("related_documents")
   private List<RelatedDocument> relatedDocuments = new ArrayList<>();
   private List<XmlNamespace> namespaces = new ArrayList<>();
-  @JsonProperty("received_payment_ids")
   private List<String> receivedPaymentIds = new ArrayList<>();
-  @JsonProperty("target_invoice_ids")
   private List<String> targetInvoiceIds = new ArrayList<>();
 
   public String getId() { return id; }

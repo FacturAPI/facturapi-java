@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaDeduccion {
-  @JsonProperty("tipo_deduccion")
   private String tipoDeduccion;
   private String concepto;
   private String clave;

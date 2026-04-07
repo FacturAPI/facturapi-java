@@ -6,11 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReceiptSettings {
   private String periodicity;
-  @JsonProperty("duration_days")
   private Integer durationDays;
-  @JsonProperty("next_folio_number")
   private Integer nextFolioNumber;
-  @JsonProperty("next_folio_number_test")
   private Integer nextFolioNumberTest;
 
   public String getPeriodicity() { return periodicity; }

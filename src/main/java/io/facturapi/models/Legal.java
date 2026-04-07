@@ -6,16 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Legal {
   private String name;
-  @JsonProperty("legal_name")
   private String legalName;
-  @JsonProperty("tax_id")
   private String taxId;
-  @JsonProperty("tax_system")
   private String taxSystem;
   private Address address;
   private String phone;
   private String website;
-  @JsonProperty("support_email")
   private String supportEmail;
   private String curp;
 

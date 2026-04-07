@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaCompensacion {
-  @JsonProperty("saldo_a_favor")
   private Double saldoAFavor;
   private Integer ano;
-  @JsonProperty("remanente_sal_fav")
   private Double remanenteSalFav;
 
   public Double getSaldoAFavor() { return saldoAFavor; }

@@ -6,11 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomerInfo {
   private String id;
-  @JsonProperty("legal_name")
   private String legalName;
-  @JsonProperty("tax_id")
   private String taxId;
-  @JsonProperty("tax_system")
   private String taxSystem;
   private Address address;
 

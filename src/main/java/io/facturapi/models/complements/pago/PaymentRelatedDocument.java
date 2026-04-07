@@ -11,11 +11,9 @@ public class PaymentRelatedDocument {
   private String uuid;
   private Double amount;
   private Integer installment;
-  @JsonProperty("last_balance")
   private Double lastBalance;
   private String currency;
   private Double exchange;
-  @JsonProperty("folio_number")
   private String folioNumber;
   private String series;
   private Taxability taxability;

@@ -8,22 +8,16 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaComplementData {
-  @JsonProperty("fecha_inicial_pago")
   private LocalDate fechaInicialPago;
-  @JsonProperty("fecha_final_pago")
   private LocalDate fechaFinalPago;
   private NominaPercepciones percepciones;
   private List<NominaDeduccion> deducciones = new ArrayList<>();
-  @JsonProperty("otros_pagos")
   private List<NominaOtroPago> otrosPagos = new ArrayList<>();
   private List<NominaIncapacidad> incapacidades = new ArrayList<>();
   private NominaEmisor emisor;
   private NominaReceptor receptor;
-  @JsonProperty("tipo_nomina")
   private String tipoNomina;
-  @JsonProperty("fecha_pago")
   private LocalDate fechaPago;
-  @JsonProperty("num_dias_pagados")
   private Double numDiasPagados;
 
   public LocalDate getFechaInicialPago() { return fechaInicialPago; }

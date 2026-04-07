@@ -8,13 +8,10 @@ import java.time.Instant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InvoiceCancellation {
-  @JsonProperty("requested_at")
   private Instant requestedAt;
   private CancellationStatus status;
-  @JsonProperty("last_checked")
   private Instant lastChecked;
   private CancellationMotive motive;
-  @JsonProperty("substitution_uuid")
   private String substitutionUuid;
 
   public Instant getRequestedAt() { return requestedAt; }

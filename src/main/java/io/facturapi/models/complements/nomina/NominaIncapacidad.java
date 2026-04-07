@@ -5,11 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaIncapacidad {
-  @JsonProperty("dias_incapacidad")
   private Integer diasIncapacidad;
-  @JsonProperty("tipo_incapacidad")
   private String tipoIncapacidad;
-  @JsonProperty("importe_monetario")
   private Double importeMonetario;
 
   public Integer getDiasIncapacidad() { return diasIncapacidad; }

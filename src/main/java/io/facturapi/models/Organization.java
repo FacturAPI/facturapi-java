@@ -9,19 +9,14 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Organization {
   private String id;
-  @JsonProperty("created_at")
   private Instant createdAt;
   private String plan;
-  @JsonProperty("add_ons")
   private List<String> addOns = new ArrayList<>();
   @JsonProperty("is_production_ready")
   private Boolean productionReady;
-  @JsonProperty("pending_steps")
   private List<CompletionStep> pendingSteps = new ArrayList<>();
-  @JsonProperty("logo_url")
   private String logoUrl;
   private String domain;
-  @JsonProperty("custom_domain")
   private String customDomain;
   private String timezone;
   private Legal legal;
@@ -29,9 +24,7 @@ public class Organization {
   private Certificate certificate;
   private Certificate fiel;
   private ReceiptSettings receipts;
-  @JsonProperty("self_invoice")
   private SelfInvoiceSettings selfInvoice;
-  @JsonProperty("pending_plan_update")
   private PendingPlanUpdate pendingPlanUpdate;
 
   public String getId() { return id; }

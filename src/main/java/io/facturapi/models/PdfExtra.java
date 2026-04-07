@@ -6,19 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PdfExtra {
   private Boolean codes;
-  @JsonProperty("address_codes")
   private Boolean addressCodes;
-  @JsonProperty("product_key")
   private Boolean productKey;
-  @JsonProperty("round_unit_price")
   private Boolean roundUnitPrice;
-  @JsonProperty("tax_breakdown")
   private Boolean taxBreakdown;
-  @JsonProperty("ieps_breakdown")
   private Boolean iepsBreakdown;
-  @JsonProperty("render_carta_porte")
   private Boolean renderCartaPorte;
-  @JsonProperty("repeat_signature")
   private Boolean repeatSignature;
 
   public Boolean getCodes() { return codes; }

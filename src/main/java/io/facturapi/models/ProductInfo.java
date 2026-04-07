@@ -9,19 +9,14 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductInfo {
   private String id;
-  @JsonProperty("product_key")
   private String productKey;
   private String description;
-  @JsonProperty("unit_key")
   private String unitKey;
-  @JsonProperty("unit_name")
   private String unitName;
   private Double price;
   private Taxability taxability;
-  @JsonProperty("tax_included")
   private Boolean taxIncluded;
   private List<Tax> taxes = new ArrayList<>();
-  @JsonProperty("local_taxes")
   private List<LocalTax> localTaxes = new ArrayList<>();
   private String sku;
 

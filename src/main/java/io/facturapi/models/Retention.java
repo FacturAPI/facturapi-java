@@ -9,36 +9,26 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Retention {
   private String id;
-  @JsonProperty("created_at")
   private Instant createdAt;
   private CustomerInfo customer;
   private String organization;
   private Boolean livemode;
   private String status;
   private String uuid;
-  @JsonProperty("external_id")
   private String externalId;
-  @JsonProperty("fecha_exp")
   private Instant fechaExp;
-  @JsonProperty("cve_retenc")
   private String cveRetenc;
-  @JsonProperty("folio_int")
   private String folioInt;
-  @JsonProperty("desc_retenc")
   private String descRetenc;
   private RetentionPeriod periodo;
   private RetentionTotals totales;
   private List<XmlNamespace> namespaces = new ArrayList<>();
-  @JsonProperty("related_documents")
   private List<RelatedDocument> relatedDocuments = new ArrayList<>();
   private List<String> complements = new ArrayList<>();
   private List<String> addenda = new ArrayList<>();
-  @JsonProperty("cancellation_receipt")
   private String cancellationReceipt;
   private Stamp stamp;
-  @JsonProperty("pdf_custom_section")
   private String pdfCustomSection;
-  @JsonProperty("verification_url")
   private String verificationUrl;
 
   public String getId() { return id; }

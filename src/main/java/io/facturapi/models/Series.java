@@ -8,9 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Series {
   @JsonAlias({"series", "name"})
   private String series;
-  @JsonProperty("next_folio")
   private Integer nextFolio;
-  @JsonProperty("next_folio_test")
   private Integer nextFolioTest;
 
   public String getSeries() { return series; }

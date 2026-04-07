@@ -11,20 +11,14 @@ import java.util.Map;
 public class OrganizationTeamRole {
   private String id;
   private String name;
-  @JsonProperty("template_code")
   private String templateCode;
   private String scope;
   private String organization;
   private List<String> operations = new ArrayList<>();
-  @JsonProperty("used_by")
   private Integer usedBy;
-  @JsonProperty("created_at")
   private Instant createdAt;
-  @JsonProperty("updated_at")
   private Instant updatedAt;
-  @JsonProperty("created_by")
   private Map<String, Object> createdBy;
-  @JsonProperty("updated_by")
   private Map<String, Object> updatedBy;
 
   public String getId() { return id; }
