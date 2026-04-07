@@ -95,11 +95,12 @@ jobs:
           PY
 
       - name: Publish
+        id: publish_step
         if: steps.gate.outputs.publish == 'true'
         run: mvn -B -ntp -DskipTests -DpublishRelease=true deploy
 
       - name: Notify Slack (success)
-        if: steps.gate.outputs.publish == 'true' && success()
+        if: steps.gate.outputs.publish == 'true' && steps.publish_step.outcome == 'success'
         env:
           SLACK_DEPLOY_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOY_WEBHOOK_URL }}
           VERSION: ${{ steps.gate.outputs.current_version }}
@@ -188,7 +189,7 @@ jobs:
           curl -sS -X POST -H "Content-type: application/json" --data "@/tmp/slack_payload.json" "$SLACK_DEPLOY_WEBHOOK_URL"
 
       - name: Notify Slack (failure)
-        if: steps.gate.outputs.publish == 'true' && failure()
+        if: steps.gate.outputs.publish == 'true' && steps.publish_step.outcome == 'failure'
         env:
           SLACK_DEPLOY_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOY_WEBHOOK_URL }}
           VERSION: ${{ steps.gate.outputs.current_version }}
