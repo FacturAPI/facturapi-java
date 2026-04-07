@@ -186,7 +186,7 @@ jobs:
           Path("/tmp/slack_payload.json").write_text(json.dumps(payload), encoding="utf-8")
           PY
 
-          curl -sS -X POST -H "Content-type: application/json" --data "@/tmp/slack_payload.json" "$SLACK_DEPLOY_WEBHOOK_URL"
+          curl -sS -X POST -H "Content-type: application/json" --data "@/tmp/slack_payload.json" "$SLACK_DEPLOY_WEBHOOK_URL" || true
 
       - name: Notify Slack (failure)
         if: steps.gate.outputs.publish == 'true' && steps.publish_step.outcome == 'failure'
@@ -230,7 +230,7 @@ jobs:
 
           Path("/tmp/slack_payload_failure.json").write_text(json.dumps(payload), encoding="utf-8")
           PY
-          curl -sS -X POST -H "Content-type: application/json" --data "@/tmp/slack_payload_failure.json" "$SLACK_DEPLOY_WEBHOOK_URL"
+          curl -sS -X POST -H "Content-type: application/json" --data "@/tmp/slack_payload_failure.json" "$SLACK_DEPLOY_WEBHOOK_URL" || true
 
       - name: Skip publish
         if: steps.gate.outputs.publish != 'true'
