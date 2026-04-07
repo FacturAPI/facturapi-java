@@ -1,8 +1,14 @@
-# facturapi-java
+# Facturapi Java SDK
 
 SDK oficial de Java para [Facturapi](https://www.facturapi.io).
 
 English: [README.md](README.md)
+
+Facturapi ayuda a generar facturas electrónicas válidas en México (CFDI).
+
+Si alguna vez has usado Stripe o algún SDK similar de pagos o facturación, la interfaz aquí te resultará familiar: modelos tipados en las respuestas y JSON flexible en las entradas.
+
+Asegúrate de tener una cuenta de Facturapi y tu API Key a la mano.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/facturapi/facturapi-java/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/facturapi/facturapi-java/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/io.facturapi/facturapi-java?style=for-the-badge&label=Maven%20Central)](https://central.sonatype.com/artifact/io.facturapi/facturapi-java)
@@ -104,3 +110,24 @@ Facturapi facturapi = Facturapi.builder("sk_test_...")
   .timeout(java.time.Duration.ofSeconds(20))
   .build();
 ```
+
+### Cliente HTTP personalizado
+
+Para pruebas o configuraciones avanzadas, puedes inyectar tu propio `OkHttpClient`:
+
+```java
+import okhttp3.OkHttpClient;
+
+Facturapi facturapi = Facturapi.builder("sk_test_...")
+  .httpClient(new OkHttpClient())
+  .build();
+```
+
+## Documentación
+
+Docs completas: [https://docs.facturapi.io](https://docs.facturapi.io)
+
+## Soporte
+
+- Issues: abre un issue en GitHub
+- Email: `contacto@facturapi.io`
