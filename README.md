@@ -9,6 +9,9 @@ Official Java SDK for [Facturapi](https://www.facturapi.io).
 ## Requirements
 
 - Java 11+
+- Kotlin/JVM
+- Android 8.0 (API level 26) o superior
+- Spring Boot, Jakarta EE, Quarkus, Micronaut, and other JVM server apps
 
 ## Installation
 
