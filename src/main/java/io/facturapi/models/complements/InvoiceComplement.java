@@ -52,7 +52,6 @@ public class InvoiceComplement {
     parseRawData();
   }
 
-  @JsonProperty("data")
   public Object getData() {
     if ("pago".equals(type)) {
       return pagoData;
