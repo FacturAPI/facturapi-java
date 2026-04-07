@@ -1,0 +1,104 @@
+name: Publish Java SDK
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to Maven Central
+    runs-on: ubuntu-latest
+    env:
+      CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+      CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+          server-id: central
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE
+
+      - name: Check release gate
+        id: gate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import sys
+          import urllib.request
+          import xml.etree.ElementTree as ET
+
+          ns = {"m": "http://maven.apache.org/POM/4.0.0"}
+          pom = ET.parse("pom.xml").getroot()
+          version = pom.findtext("m:version", namespaces=ns)
+          if version is None:
+              print("publish=false")
+              print("reason=missing version")
+              sys.exit(0)
+
+          if version.endswith("-SNAPSHOT"):
+              print("publish=false")
+              print(f"current_version={version}")
+              print("reason=snapshot version")
+              sys.exit(0)
+
+          metadata_url = "https://repo.maven.apache.org/maven2/io/facturapi/facturapi-java/maven-metadata.xml"
+          latest = "0.0.0"
+          try:
+              with urllib.request.urlopen(metadata_url, timeout=20) as response:
+                  metadata = ET.fromstring(response.read())
+              latest = metadata.findtext("./versioning/release") or metadata.findtext("./versioning/latest") or latest
+          except Exception:
+              latest = "0.0.0"
+
+          def parse_semver(value: str):
+              core = value.split("+", 1)[0]
+              main, _, prerelease = core.partition("-")
+              major, minor, patch = (int(part) for part in main.split(".")[:3])
+              return major, minor, patch, prerelease
+
+          def is_greater(left: str, right: str) -> bool:
+              left_parts = parse_semver(left)
+              right_parts = parse_semver(right)
+              if left_parts[:3] != right_parts[:3]:
+                  return left_parts[:3] > right_parts[:3]
+              left_pre = left_parts[3]
+              right_pre = right_parts[3]
+              if left_pre == right_pre:
+                  return False
+              if not left_pre:
+                  return True
+              if not right_pre:
+                  return False
+              return left_pre > right_pre
+
+          publish = is_greater(version, latest)
+          print(f"current_version={version}")
+          print(f"latest_version={latest}")
+          print(f"publish={'true' if publish else 'false'}")
+          print(f"reason={'current version is newer than published version' if publish else 'published version is current or newer'}")
+          PY
+
+      - name: Publish
+        if: steps.gate.outputs.publish == 'true'
+        run: mvn -B -ntp -DskipTests -DpublishRelease=true deploy
+
+      - name: Skip publish
+        if: steps.gate.outputs.publish != 'true'
+        run: |
+          echo "Skipping publish: ${{ steps.gate.outputs.reason }} (${{ steps.gate.outputs.current_version }} vs ${{ steps.gate.outputs.latest_version }})"
