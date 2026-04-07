@@ -1,21 +1,21 @@
 # facturapi-java
 
-Official Java SDK for [Facturapi](https://www.facturapi.io).
+SDK oficial de Java para [Facturapi](https://www.facturapi.io).
 
-Español: [README.es.md](README.es.md)
+English: [README.md](README.md)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/facturapi/facturapi-java/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/facturapi/facturapi-java/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/io.facturapi/facturapi-java?style=for-the-badge&label=Maven%20Central)](https://central.sonatype.com/artifact/io.facturapi/facturapi-java)
 [![Java](https://img.shields.io/badge/Java-11%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/)
 
-## Requirements
+## Requisitos
 
 - Java 11+
 - Kotlin/JVM
 - Android 8.0 (API level 26) o superior
-- Spring Boot, Jakarta EE, Quarkus, Micronaut, and other JVM server apps
+- Spring Boot, Jakarta EE, Quarkus, Micronaut y otras apps JVM de servidor
 
-## Installation
+## Instalación
 
 Maven:
 
@@ -33,7 +33,7 @@ Gradle:
 implementation("io.facturapi:facturapi-java:0.1.0")
 ```
 
-## Quickstart
+## Inicio rápido
 
 ```java
 import io.facturapi.Facturapi;
@@ -56,7 +56,7 @@ var invoice = facturapi.invoices().create(Map.of(
 System.out.println(invoice.getId());
 ```
 
-## Uploads
+## Subidas
 
 ```java
 import java.io.File;
@@ -74,7 +74,7 @@ var updated = facturapi.organizations().uploadCertificate(
 );
 ```
 
-## Errors
+## Errores
 
 ```java
 import io.facturapi.FacturapiException;
@@ -89,14 +89,14 @@ try {
 }
 ```
 
-## Design
+## Diseño
 
-- Inputs use flexible JSON dictionaries (`Map<String, Object>`).
-- Outputs are typed Java models (`Invoice`, `Customer`, `SearchResult<T>`, etc.).
-- Errors expose the useful API error fields directly on `FacturapiException`.
-- Auth uses `Authorization: Bearer <apiKey>`.
+- Las entradas usan diccionarios JSON flexibles (`Map<String, Object>`).
+- Las salidas son modelos Java tipados (`Invoice`, `Customer`, `SearchResult<T>`, etc.).
+- Los errores exponen directamente los campos útiles del error del API en `FacturapiException`.
+- La autenticación usa `Authorization: Bearer <apiKey>`.
 
-## Configuration
+## Configuración
 
 ```java
 Facturapi facturapi = Facturapi.builder("sk_test_...")
