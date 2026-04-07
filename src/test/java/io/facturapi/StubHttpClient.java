@@ -10,6 +10,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
@@ -42,7 +43,9 @@ final class StubHttpClient extends HttpClient {
   private final List<HttpRequest> requests = new ArrayList<>();
 
   void enqueueJson(int statusCode, String json) {
-    queue.add(new QueuedResponse(statusCode, json.getBytes(), Map.of("Content-Type", List.of("application/json"))));
+    queue.add(
+      new QueuedResponse(statusCode, json.getBytes(StandardCharsets.UTF_8), Map.of("Content-Type", List.of("application/json")))
+    );
   }
 
   void enqueueBinary(int statusCode, byte[] bytes, String contentType) {

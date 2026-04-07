@@ -16,15 +16,25 @@ public class PagoComplementData {
   private List<PaymentRelatedDocument> relatedDocuments = new ArrayList<>();
   private String currency;
   private Double exchange;
+  @JsonProperty("num_operacion")
   private String numOperacion;
+  @JsonProperty("rfc_emisor_cta_ord")
   private String rfcEmisorCtaOrd;
+  @JsonProperty("nom_banco_ord_ext")
   private String nomBancoOrdExt;
+  @JsonProperty("cta_ordenante")
   private String ctaOrdenante;
+  @JsonProperty("rfc_emisor_cta_ben")
   private String rfcEmisorCtaBen;
+  @JsonProperty("cta_beneficiario")
   private String ctaBeneficiario;
+  @JsonProperty("tipo_cad_pago")
   private String tipoCadPago;
+  @JsonProperty("cert_pago")
   private String certPago;
+  @JsonProperty("cad_pago")
   private String cadPago;
+  @JsonProperty("sello_pago")
   private String selloPago;
 
   public PaymentForm getPaymentForm() { return paymentForm; }
