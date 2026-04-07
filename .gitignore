@@ -1,0 +1,13 @@
+# Build artifacts
+target/
+
+# Local Maven cache override used in this workspace
+.m2/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# OS files
+.DS_Store
