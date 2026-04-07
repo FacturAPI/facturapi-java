@@ -2,6 +2,12 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.facturapi.enums.CancellationStatus;
+import io.facturapi.enums.InvoiceStatus;
+import io.facturapi.enums.InvoiceType;
+import io.facturapi.enums.IssuingType;
+import io.facturapi.enums.PaymentForm;
+import io.facturapi.enums.PaymentMethod;
 import io.facturapi.models.complements.InvoiceComplement;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -16,17 +22,17 @@ public class Invoice {
   private Instant createdAt;
   private Instant date;
   @JsonProperty("issuer_type")
-  private String issuerType;
-  private String type;
-  private String status;
+  private IssuingType issuerType;
+  private InvoiceType type;
+  private InvoiceStatus status;
   @JsonProperty("cfdi_version")
   private Integer cfdiVersion;
   @JsonProperty("issuer_info")
   private CustomerInfo issuerInfo;
   @JsonProperty("payment_form")
-  private String paymentForm;
+  private PaymentForm paymentForm;
   @JsonProperty("payment_method")
-  private String paymentMethod;
+  private PaymentMethod paymentMethod;
   private String currency;
   private Double exchange;
   private String uuid;
@@ -47,7 +53,7 @@ public class Invoice {
   @JsonProperty("verification_carta_porte")
   private String verificationCartaPorte;
   @JsonProperty("cancellation_status")
-  private String cancellationStatus;
+  private CancellationStatus cancellationStatus;
   @JsonProperty("external_id")
   private String externalId;
   @JsonProperty("idempotency_key")
@@ -80,20 +86,20 @@ public class Invoice {
   public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
   public Instant getDate() { return date; }
   public void setDate(Instant date) { this.date = date; }
-  public String getIssuerType() { return issuerType; }
-  public void setIssuerType(String issuerType) { this.issuerType = issuerType; }
-  public String getType() { return type; }
-  public void setType(String type) { this.type = type; }
-  public String getStatus() { return status; }
-  public void setStatus(String status) { this.status = status; }
+  public IssuingType getIssuerType() { return issuerType; }
+  public void setIssuerType(IssuingType issuerType) { this.issuerType = issuerType; }
+  public InvoiceType getType() { return type; }
+  public void setType(InvoiceType type) { this.type = type; }
+  public InvoiceStatus getStatus() { return status; }
+  public void setStatus(InvoiceStatus status) { this.status = status; }
   public Integer getCfdiVersion() { return cfdiVersion; }
   public void setCfdiVersion(Integer cfdiVersion) { this.cfdiVersion = cfdiVersion; }
   public CustomerInfo getIssuerInfo() { return issuerInfo; }
   public void setIssuerInfo(CustomerInfo issuerInfo) { this.issuerInfo = issuerInfo; }
-  public String getPaymentForm() { return paymentForm; }
-  public void setPaymentForm(String paymentForm) { this.paymentForm = paymentForm; }
-  public String getPaymentMethod() { return paymentMethod; }
-  public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+  public PaymentForm getPaymentForm() { return paymentForm; }
+  public void setPaymentForm(PaymentForm paymentForm) { this.paymentForm = paymentForm; }
+  public PaymentMethod getPaymentMethod() { return paymentMethod; }
+  public void setPaymentMethod(PaymentMethod paymentMethod) { this.paymentMethod = paymentMethod; }
   public String getCurrency() { return currency; }
   public void setCurrency(String currency) { this.currency = currency; }
   public Double getExchange() { return exchange; }
@@ -122,8 +128,8 @@ public class Invoice {
   public void setVerificationUrl(String verificationUrl) { this.verificationUrl = verificationUrl; }
   public String getVerificationCartaPorte() { return verificationCartaPorte; }
   public void setVerificationCartaPorte(String verificationCartaPorte) { this.verificationCartaPorte = verificationCartaPorte; }
-  public String getCancellationStatus() { return cancellationStatus; }
-  public void setCancellationStatus(String cancellationStatus) { this.cancellationStatus = cancellationStatus; }
+  public CancellationStatus getCancellationStatus() { return cancellationStatus; }
+  public void setCancellationStatus(CancellationStatus cancellationStatus) { this.cancellationStatus = cancellationStatus; }
   public String getExternalId() { return externalId; }
   public void setExternalId(String externalId) { this.externalId = externalId; }
   public String getIdempotencyKey() { return idempotencyKey; }

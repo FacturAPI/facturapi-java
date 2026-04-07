@@ -2,6 +2,7 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.facturapi.enums.Taxability;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class Product {
   @JsonProperty("unit_name")
   private String unitName;
   private String sku;
-  private String taxability;
+  private Taxability taxability;
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
@@ -55,6 +56,6 @@ public class Product {
   public void setUnitName(String unitName) { this.unitName = unitName; }
   public String getSku() { return sku; }
   public void setSku(String sku) { this.sku = sku; }
-  public String getTaxability() { return taxability; }
-  public void setTaxability(String taxability) { this.taxability = taxability; }
+  public Taxability getTaxability() { return taxability; }
+  public void setTaxability(Taxability taxability) { this.taxability = taxability; }
 }

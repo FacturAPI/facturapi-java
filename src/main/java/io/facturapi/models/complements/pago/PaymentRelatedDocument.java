@@ -2,6 +2,7 @@ package io.facturapi.models.complements.pago;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.facturapi.enums.Taxability;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class PaymentRelatedDocument {
   @JsonProperty("folio_number")
   private String folioNumber;
   private String series;
-  private String taxability;
+  private Taxability taxability;
   private List<PaymentRelatedDocumentTax> taxes = new ArrayList<>();
 
   public String getUuid() { return uuid; }
@@ -36,8 +37,8 @@ public class PaymentRelatedDocument {
   public void setFolioNumber(String folioNumber) { this.folioNumber = folioNumber; }
   public String getSeries() { return series; }
   public void setSeries(String series) { this.series = series; }
-  public String getTaxability() { return taxability; }
-  public void setTaxability(String taxability) { this.taxability = taxability; }
+  public Taxability getTaxability() { return taxability; }
+  public void setTaxability(Taxability taxability) { this.taxability = taxability; }
   public List<PaymentRelatedDocumentTax> getTaxes() { return taxes; }
   public void setTaxes(List<PaymentRelatedDocumentTax> taxes) { this.taxes = taxes; }
 }

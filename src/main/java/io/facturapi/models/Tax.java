@@ -1,15 +1,17 @@
 package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.facturapi.enums.TaxFactor;
+import io.facturapi.enums.TaxType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Tax {
   private Double base;
   private Double amount;
   private Double rate;
-  private String type;
+  private TaxType type;
   private Boolean withholding;
-  private String factor;
+  private TaxFactor factor;
 
   public Double getBase() {
     return base;
@@ -35,11 +37,11 @@ public class Tax {
     this.rate = rate;
   }
 
-  public String getType() {
+  public TaxType getType() {
     return type;
   }
 
-  public void setType(String type) {
+  public void setType(TaxType type) {
     this.type = type;
   }
 
@@ -51,11 +53,11 @@ public class Tax {
     this.withholding = withholding;
   }
 
-  public String getFactor() {
+  public TaxFactor getFactor() {
     return factor;
   }
 
-  public void setFactor(String factor) {
+  public void setFactor(TaxFactor factor) {
     this.factor = factor;
   }
 }

@@ -3,18 +3,17 @@ package io.facturapi.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum TaxType {
-  IVA,
-  IEPS,
-  ISR;
+public enum IssuingType {
+  ISSUING,
+  RECEIVING;
 
   @JsonValue
   public String value() {
-    return name();
+    return name().toLowerCase();
   }
 
   @JsonCreator
-  public static TaxType fromValue(String value) {
-    return TaxType.valueOf(value);
+  public static IssuingType fromValue(String value) {
+    return IssuingType.valueOf(value.toUpperCase());
   }
 }

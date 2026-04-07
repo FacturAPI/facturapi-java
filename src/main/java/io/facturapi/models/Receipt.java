@@ -2,6 +2,7 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.facturapi.enums.PaymentForm;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class Receipt {
   private String idempotencyKey;
   private String branch;
   @JsonProperty("payment_form")
-  private String paymentForm;
+  private PaymentForm paymentForm;
   private List<InvoiceItem> items = new ArrayList<>();
   private String currency;
   private Double exchange;
@@ -57,8 +58,8 @@ public class Receipt {
   public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
   public String getBranch() { return branch; }
   public void setBranch(String branch) { this.branch = branch; }
-  public String getPaymentForm() { return paymentForm; }
-  public void setPaymentForm(String paymentForm) { this.paymentForm = paymentForm; }
+  public PaymentForm getPaymentForm() { return paymentForm; }
+  public void setPaymentForm(PaymentForm paymentForm) { this.paymentForm = paymentForm; }
   public List<InvoiceItem> getItems() { return items; }
   public void setItems(List<InvoiceItem> items) { this.items = items; }
   public String getCurrency() { return currency; }

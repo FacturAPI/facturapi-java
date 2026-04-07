@@ -4,6 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import io.facturapi.enums.CancellationStatus;
+import io.facturapi.enums.InvoiceStatus;
+import io.facturapi.enums.InvoiceType;
+import io.facturapi.enums.IssuingType;
+import io.facturapi.enums.PaymentForm;
+import io.facturapi.enums.PaymentMethod;
+import io.facturapi.enums.TaxFactor;
+import io.facturapi.enums.TaxType;
+import io.facturapi.enums.Taxability;
 import io.facturapi.http.FacturapiConfig;
 import io.facturapi.models.Customer;
 import java.time.Instant;
@@ -76,8 +85,8 @@ class FacturapiResourcesTest {
     StubHttpClient httpClient = new StubHttpClient();
     httpClient.enqueueJson(
       200,
-      "{\"id\":\"inv_1\",\"created_at\":\"2026-04-07T10:00:00Z\",\"date\":\"2026-04-07T12:30:00Z\",\"complements\":[" +
-      "{\"type\":\"pago\",\"data\":[{\"payment_form\":\"03\",\"date\":\"2026-04-07T13:45:00Z\",\"currency\":\"MXN\",\"exchange\":1,\"related_documents\":[{\"uuid\":\"f03d5c3f-a93b-443f-927f-e89db2f7f58a\",\"amount\":100,\"installment\":1,\"last_balance\":100,\"currency\":\"MXN\",\"exchange\":1,\"taxes\":[{\"base\":100,\"rate\":0.16,\"type\":\"IVA\",\"factor\":\"Tasa\",\"withholding\":false}]}]}]}," +
+      "{\"id\":\"inv_1\",\"created_at\":\"2026-04-07T10:00:00Z\",\"date\":\"2026-04-07T12:30:00Z\",\"issuer_type\":\"issuing\",\"type\":\"P\",\"status\":\"valid\",\"payment_form\":\"03\",\"payment_method\":\"PUE\",\"cancellation_status\":\"none\",\"complements\":[" +
+      "{\"type\":\"pago\",\"data\":[{\"payment_form\":\"03\",\"date\":\"2026-04-07T13:45:00Z\",\"currency\":\"MXN\",\"exchange\":1,\"related_documents\":[{\"uuid\":\"f03d5c3f-a93b-443f-927f-e89db2f7f58a\",\"amount\":100,\"installment\":1,\"last_balance\":100,\"currency\":\"MXN\",\"exchange\":1,\"taxability\":\"02\",\"taxes\":[{\"base\":100,\"rate\":0.16,\"type\":\"IVA\",\"factor\":\"Tasa\",\"withholding\":false}]}]}]}," +
       "{\"type\":\"nomina\",\"data\":{\"tipo_nomina\":\"O\",\"fecha_pago\":\"2026-04-01\",\"fecha_inicial_pago\":\"2026-03-16\",\"fecha_final_pago\":\"2026-03-31\",\"num_dias_pagados\":15,\"receptor\":{\"curp\":\"TEST900101HDFABC01\",\"tipo_contrato\":\"01\",\"tipo_regimen\":\"02\",\"num_empleado\":\"EMP-1\",\"periodicidad_pago\":\"04\",\"clave_ent_fed\":\"CMX\",\"fecha_inicio_rel_laboral\":\"2026-01-01\"},\"percepciones\":{\"percepcion\":[{\"tipo_percepcion\":\"001\",\"clave\":\"P001\",\"importe_gravado\":1000,\"importe_exento\":0}]},\"deducciones\":[{\"tipo_deduccion\":\"002\",\"clave\":\"D001\",\"importe\":100}]}}," +
       "{\"type\":\"custom\",\"data\":\"<my:Complement xmlns:my=\\\"https://example.com\\\"/>\"}," +
       "{\"type\":\"carta_porte\",\"data\":{\"IdCCP\":\"CPC2026040700001\",\"TranspInternac\":\"No\",\"TotalDistRec\":15.4,\"Ubicaciones\":[],\"Mercancias\":{\"Mercancia\":[]}}}," +
@@ -94,15 +103,24 @@ class FacturapiResourcesTest {
     var invoice = sdk.invoices().retrieve("inv_1");
     assertEquals(Instant.parse("2026-04-07T10:00:00Z"), invoice.getCreatedAt());
     assertEquals(Instant.parse("2026-04-07T12:30:00Z"), invoice.getDate());
+    assertEquals(IssuingType.ISSUING, invoice.getIssuerType());
+    assertEquals(InvoiceType.PAGO, invoice.getType());
+    assertEquals(InvoiceStatus.VALID, invoice.getStatus());
+    assertEquals(PaymentForm.TRANSFERENCIA_ELECTRONICA_DE_FONDOS, invoice.getPaymentForm());
+    assertEquals(PaymentMethod.PUE, invoice.getPaymentMethod());
+    assertEquals(CancellationStatus.NONE, invoice.getCancellationStatus());
     assertEquals(5, invoice.getComplements().size());
 
     var pago = invoice.getComplements().get(0);
     assertEquals("pago", pago.getType());
     assertNotNull(pago.getPagoData());
     assertEquals(1, pago.getPagoData().size());
-    assertEquals("03", pago.getPagoData().get(0).getPaymentForm());
+    assertEquals(PaymentForm.TRANSFERENCIA_ELECTRONICA_DE_FONDOS, pago.getPagoData().get(0).getPaymentForm());
     assertEquals(Instant.parse("2026-04-07T13:45:00Z"), pago.getPagoData().get(0).getDate());
     assertEquals("f03d5c3f-a93b-443f-927f-e89db2f7f58a", pago.getPagoData().get(0).getRelatedDocuments().get(0).getUuid());
+    assertEquals(Taxability.SUBJECT_TO_TAX, pago.getPagoData().get(0).getRelatedDocuments().get(0).getTaxability());
+    assertEquals(TaxType.IVA, pago.getPagoData().get(0).getRelatedDocuments().get(0).getTaxes().get(0).getType());
+    assertEquals(TaxFactor.TASA, pago.getPagoData().get(0).getRelatedDocuments().get(0).getTaxes().get(0).getFactor());
     assertInstanceOf(java.util.List.class, pago.getData());
 
     var nomina = invoice.getComplements().get(1);
@@ -152,5 +170,14 @@ class FacturapiResourcesTest {
     assertEquals(Instant.parse("2026-04-07T10:11:12Z"), customer.getCreatedAt());
     assertEquals(Instant.parse("2026-04-07T11:11:12Z"), customer.getSatValidatedAt());
     assertEquals(Instant.parse("2026-04-08T00:00:00Z"), customer.getEditLinkExpiresAt());
+  }
+
+  @Test
+  void objectMapperDeserializesCodeEnums() throws Exception {
+    var mapper = FacturapiConfig.builder("sk_test").build().getObjectMapper();
+
+    var tax = mapper.readValue("{\"type\":\"IEPS\",\"factor\":\"Exento\"}", io.facturapi.models.Tax.class);
+    assertEquals(TaxType.IEPS, tax.getType());
+    assertEquals(TaxFactor.EXENTO, tax.getFactor());
   }
 }

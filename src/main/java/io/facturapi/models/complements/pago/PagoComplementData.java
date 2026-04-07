@@ -2,6 +2,7 @@ package io.facturapi.models.complements.pago;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.facturapi.enums.PaymentForm;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PagoComplementData {
   @JsonProperty("payment_form")
-  private String paymentForm;
+  private PaymentForm paymentForm;
   private Instant date;
   @JsonProperty("related_documents")
   private List<PaymentRelatedDocument> relatedDocuments = new ArrayList<>();
@@ -26,8 +27,8 @@ public class PagoComplementData {
   private String cadPago;
   private String selloPago;
 
-  public String getPaymentForm() { return paymentForm; }
-  public void setPaymentForm(String paymentForm) { this.paymentForm = paymentForm; }
+  public PaymentForm getPaymentForm() { return paymentForm; }
+  public void setPaymentForm(PaymentForm paymentForm) { this.paymentForm = paymentForm; }
   public Instant getDate() { return date; }
   public void setDate(Instant date) { this.date = date; }
   public List<PaymentRelatedDocument> getRelatedDocuments() { return relatedDocuments; }
