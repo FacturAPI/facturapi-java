@@ -8,7 +8,7 @@ Español: [README.es.md](README.es.md)
 [![Maven Central](https://img.shields.io/maven-central/v/io.facturapi/facturapi-java?style=for-the-badge&label=Maven%20Central)](https://central.sonatype.com/artifact/io.facturapi/facturapi-java)
 [![Java](https://img.shields.io/badge/Java-11%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/)
 
-## Requirements
+## Compatibility
 
 - Java 11+
 - Kotlin/JVM
