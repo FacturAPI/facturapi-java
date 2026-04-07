@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.facturapi.FacturapiException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -82,6 +83,14 @@ public final class FacturapiHttpClient {
     return requestBytes("POST", path, body);
   }
 
+  public InputStream getStream(String path) {
+    return requestStream("GET", path, null);
+  }
+
+  public InputStream postStream(String path, Object body) {
+    return requestStream("POST", path, body);
+  }
+
   private JsonNode requestJsonNode(
     String method,
     String path,
@@ -117,6 +126,42 @@ public final class FacturapiHttpClient {
       HttpRequest request = buildRequest(method, path, null, body, null);
       HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
       validateResponse(response);
+      return response.body();
+    } catch (IOException e) {
+      throw new FacturapiException("I/O error when calling Facturapi API", e);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new FacturapiException("Request interrupted", e);
+    }
+  }
+
+  private InputStream requestStream(String method, String path, Object body) {
+    try {
+      HttpRequest request = buildRequest(method, path, null, body, null);
+      HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+      int statusCode = response.statusCode();
+      if (statusCode < 200 || statusCode >= 300) {
+        byte[] responseBytes;
+        try (InputStream errorStream = response.body()) {
+          responseBytes = errorStream == null ? new byte[0] : errorStream.readAllBytes();
+        }
+        String bodyText = responseBytes.length == 0 ? "" : new String(responseBytes, StandardCharsets.UTF_8);
+        String message = "Request failed with status " + statusCode;
+        try {
+          JsonNode error = objectMapper.readTree(bodyText);
+          JsonNode messageNode = firstDefined(error, "message", "error", "detail");
+          if (messageNode != null && messageNode.isTextual()) {
+            message = messageNode.asText();
+          } else if (!bodyText.isEmpty()) {
+            message = bodyText;
+          }
+        } catch (Exception ignored) {
+          if (!bodyText.isEmpty()) {
+            message = bodyText;
+          }
+        }
+        throw new FacturapiException(message, statusCode, bodyText);
+      }
       return response.body();
     } catch (IOException e) {
       throw new FacturapiException("I/O error when calling Facturapi API", e);

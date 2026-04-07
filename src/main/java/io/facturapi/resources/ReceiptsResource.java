@@ -6,6 +6,7 @@ import io.facturapi.models.GenericResponse;
 import io.facturapi.models.Invoice;
 import io.facturapi.models.Receipt;
 import io.facturapi.models.SearchResult;
+import java.io.InputStream;
 import java.util.Map;
 
 public class ReceiptsResource extends BaseResource {
@@ -106,5 +107,16 @@ public class ReceiptsResource extends BaseResource {
    */
   public byte[] downloadPdf(String id) {
     return client.getBytes("/receipts/" + id + "/pdf");
+  }
+
+  /**
+   * Opens a streaming receipt PDF download.
+   *
+   * @param id Receipt id.
+   * @return PDF stream. Caller owns closing it.
+   * @see <a href="https://docs.facturapi.io/api#operation/downloadReceiptPdf">API reference</a>
+   */
+  public InputStream downloadPdfStream(String id) {
+    return client.getStream("/receipts/" + id + "/pdf");
   }
 }

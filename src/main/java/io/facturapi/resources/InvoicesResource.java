@@ -5,6 +5,7 @@ import io.facturapi.http.FacturapiHttpClient;
 import io.facturapi.models.GenericResponse;
 import io.facturapi.models.Invoice;
 import io.facturapi.models.SearchResult;
+import java.io.InputStream;
 import java.util.Map;
 
 public class InvoicesResource extends BaseResource {
@@ -87,6 +88,17 @@ public class InvoicesResource extends BaseResource {
   }
 
   /**
+   * Opens a streaming invoice PDF download.
+   *
+   * @param id Invoice id.
+   * @return PDF stream. Caller owns closing it.
+   * @see <a href="https://docs.facturapi.io/api#operation/downloadInvoice">API reference</a>
+   */
+  public InputStream downloadPdfStream(String id) {
+    return client.getStream("/invoices/" + id + "/pdf");
+  }
+
+  /**
    * Downloads an invoice XML file.
    *
    * @param id Invoice id.
@@ -95,6 +107,17 @@ public class InvoicesResource extends BaseResource {
    */
   public byte[] downloadXml(String id) {
     return client.getBytes("/invoices/" + id + "/xml");
+  }
+
+  /**
+   * Opens a streaming invoice XML download.
+   *
+   * @param id Invoice id.
+   * @return XML stream. Caller owns closing it.
+   * @see <a href="https://docs.facturapi.io/api#operation/downloadInvoice">API reference</a>
+   */
+  public InputStream downloadXmlStream(String id) {
+    return client.getStream("/invoices/" + id + "/xml");
   }
 
   /**
@@ -109,6 +132,17 @@ public class InvoicesResource extends BaseResource {
   }
 
   /**
+   * Opens a streaming invoice ZIP download.
+   *
+   * @param id Invoice id.
+   * @return ZIP stream. Caller owns closing it.
+   * @see <a href="https://docs.facturapi.io/api#operation/downloadInvoice">API reference</a>
+   */
+  public InputStream downloadZipStream(String id) {
+    return client.getStream("/invoices/" + id + "/zip");
+  }
+
+  /**
    * Downloads the cancellation receipt XML file.
    *
    * @param id Invoice id.
@@ -120,6 +154,17 @@ public class InvoicesResource extends BaseResource {
   }
 
   /**
+   * Opens a streaming cancellation receipt XML download.
+   *
+   * @param id Invoice id.
+   * @return XML stream. Caller owns closing it.
+   * @see <a href="https://docs.facturapi.io/api#operation/downloadCancellationReceiptXml">API reference</a>
+   */
+  public InputStream downloadCancellationReceiptXmlStream(String id) {
+    return client.getStream("/invoices/" + id + "/cancellation_receipt/xml");
+  }
+
+  /**
    * Downloads the cancellation receipt PDF file.
    *
    * @param id Invoice id.
@@ -128,6 +173,17 @@ public class InvoicesResource extends BaseResource {
    */
   public byte[] downloadCancellationReceiptPdf(String id) {
     return client.getBytes("/invoices/" + id + "/cancellation_receipt/pdf");
+  }
+
+  /**
+   * Opens a streaming cancellation receipt PDF download.
+   *
+   * @param id Invoice id.
+   * @return PDF stream. Caller owns closing it.
+   * @see <a href="https://docs.facturapi.io/api#operation/downloadCancellationReceiptXml">API reference</a>
+   */
+  public InputStream downloadCancellationReceiptPdfStream(String id) {
+    return client.getStream("/invoices/" + id + "/cancellation_receipt/pdf");
   }
 
   /**

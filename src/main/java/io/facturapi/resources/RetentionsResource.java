@@ -5,6 +5,7 @@ import io.facturapi.http.FacturapiHttpClient;
 import io.facturapi.models.GenericResponse;
 import io.facturapi.models.Retention;
 import io.facturapi.models.SearchResult;
+import java.io.InputStream;
 import java.util.Map;
 
 public class RetentionsResource extends BaseResource {
@@ -86,6 +87,17 @@ public class RetentionsResource extends BaseResource {
   }
 
   /**
+   * Opens a streaming retention PDF download.
+   *
+   * @param id Retention id.
+   * @return PDF stream. Caller owns closing it.
+   * @see <a href="https://docs.facturapi.io/api#operation/downloadRetention">API reference</a>
+   */
+  public InputStream downloadPdfStream(String id) {
+    return client.getStream("/retentions/" + id + "/pdf");
+  }
+
+  /**
    * Downloads a retention XML file.
    *
    * @param id Retention id.
@@ -97,6 +109,17 @@ public class RetentionsResource extends BaseResource {
   }
 
   /**
+   * Opens a streaming retention XML download.
+   *
+   * @param id Retention id.
+   * @return XML stream. Caller owns closing it.
+   * @see <a href="https://docs.facturapi.io/api#operation/downloadRetention">API reference</a>
+   */
+  public InputStream downloadXmlStream(String id) {
+    return client.getStream("/retentions/" + id + "/xml");
+  }
+
+  /**
    * Downloads a retention ZIP package with PDF and XML.
    *
    * @param id Retention id.
@@ -105,5 +128,16 @@ public class RetentionsResource extends BaseResource {
    */
   public byte[] downloadZip(String id) {
     return client.getBytes("/retentions/" + id + "/zip");
+  }
+
+  /**
+   * Opens a streaming retention ZIP download.
+   *
+   * @param id Retention id.
+   * @return ZIP stream. Caller owns closing it.
+   * @see <a href="https://docs.facturapi.io/api#operation/downloadRetention">API reference</a>
+   */
+  public InputStream downloadZipStream(String id) {
+    return client.getStream("/retentions/" + id + "/zip");
   }
 }

@@ -1,6 +1,7 @@
 package io.facturapi;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Authenticator;
 import java.net.CookieHandler;
 import java.net.ProxySelector;
@@ -10,6 +11,7 @@ import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
 import java.util.concurrent.Executor;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
@@ -108,7 +111,7 @@ final class StubHttpClient extends HttpClient {
       throw new IOException("No queued response");
     }
     @SuppressWarnings("unchecked")
-    T body = (T) queued.body;
+    T body = (T) buildBody(responseBodyHandler, queued.body, queued.statusCode, queued.headers);
     return new StubHttpResponse<>(request, queued.statusCode, body, queued.headers);
   }
 
@@ -186,6 +189,51 @@ final class StubHttpClient extends HttpClient {
     @Override
     public Version version() {
       return Version.HTTP_1_1;
+    }
+  }
+
+  private static <T> T buildBody(
+    HttpResponse.BodyHandler<T> responseBodyHandler,
+    byte[] body,
+    int statusCode,
+    Map<String, List<String>> headers
+  ) {
+    HttpResponse.ResponseInfo responseInfo = new ResponseInfo(statusCode, headers);
+    HttpResponse.BodySubscriber<T> subscriber = responseBodyHandler.apply(responseInfo);
+    subscriber.onSubscribe(new Flow.Subscription() {
+      @Override
+      public void request(long n) {}
+
+      @Override
+      public void cancel() {}
+    });
+    subscriber.onNext(List.of(ByteBuffer.wrap(body)));
+    subscriber.onComplete();
+    return subscriber.getBody().toCompletableFuture().join();
+  }
+
+  private static final class ResponseInfo implements HttpResponse.ResponseInfo {
+    private final int statusCode;
+    private final HttpHeaders headers;
+
+    ResponseInfo(int statusCode, Map<String, List<String>> headers) {
+      this.statusCode = statusCode;
+      this.headers = HttpHeaders.of(headers, (k, v) -> true);
+    }
+
+    @Override
+    public int statusCode() {
+      return statusCode;
+    }
+
+    @Override
+    public HttpHeaders headers() {
+      return headers;
+    }
+
+    @Override
+    public HttpClient.Version version() {
+      return HttpClient.Version.HTTP_1_1;
     }
   }
 }

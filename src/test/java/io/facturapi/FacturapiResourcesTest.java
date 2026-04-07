@@ -15,6 +15,8 @@ import io.facturapi.enums.TaxType;
 import io.facturapi.enums.Taxability;
 import io.facturapi.http.FacturapiConfig;
 import io.facturapi.models.Customer;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
@@ -39,6 +41,25 @@ class FacturapiResourcesTest {
     var request = httpClient.requests().get(0);
     assertEquals("POST", request.method());
     assertEquals("/v2/invoices?test=true", request.uri().getPath() + "?" + request.uri().getQuery());
+  }
+
+  @Test
+  void invoicePdfCanBeStreamed() throws Exception {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueBinary(200, "PDF-CONTENT".getBytes(), "application/pdf");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient)
+        .build()
+    );
+
+    try (InputStream stream = sdk.invoices().downloadPdfStream("inv_1")) {
+      assertEquals("PDF-CONTENT", new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+    }
+
+    var request = httpClient.requests().get(0);
+    assertEquals("/v2/invoices/inv_1/pdf", request.uri().getPath());
   }
 
   @Test
