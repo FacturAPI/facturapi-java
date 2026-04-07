@@ -98,6 +98,139 @@ jobs:
         if: steps.gate.outputs.publish == 'true'
         run: mvn -B -ntp -DskipTests -DpublishRelease=true deploy
 
+      - name: Notify Slack (success)
+        if: steps.gate.outputs.publish == 'true' && success()
+        env:
+          SLACK_DEPLOY_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOY_WEBHOOK_URL }}
+          VERSION: ${{ steps.gate.outputs.current_version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${SLACK_DEPLOY_WEBHOOK_URL:-}" ]; then
+            echo "SLACK_DEPLOY_WEBHOOK_URL not set; skipping Slack notification"
+            exit 0
+          fi
+
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          ref_name = os.environ["GITHUB_REF_NAME"]
+          sha = os.environ["GITHUB_SHA"]
+          actor = os.environ["GITHUB_ACTOR"]
+          server_url = os.environ["GITHUB_SERVER_URL"]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          run_id = os.environ["GITHUB_RUN_ID"]
+
+          changelog = Path("CHANGELOG.md")
+          latest_changes = "See CHANGELOG for details."
+          if changelog.exists():
+              lines = changelog.read_text(encoding="utf-8").splitlines()
+              in_latest = False
+              bullets = []
+              for line in lines:
+                  if line.startswith("## [") and not in_latest:
+                      in_latest = True
+                      continue
+                  if in_latest and line.startswith("## ["):
+                      break
+                  if in_latest and line.startswith("- "):
+                      bullets.append(line[2:].strip())
+              if bullets:
+                  latest_changes = "\n".join(f"• {b}" for b in bullets[:5])
+
+          payload = {
+              "text": f"🚀 Facturapi Java SDK {version} published",
+              "blocks": [
+                  {
+                      "type": "header",
+                      "text": {
+                          "type": "plain_text",
+                          "text": f"🚀 Java SDK {version} is live on Maven Central"
+                      }
+                  },
+                  {
+                      "type": "section",
+                      "fields": [
+                          {"type": "mrkdwn", "text": f"*Package:* `io.facturapi:facturapi-java:{version}`"},
+                          {"type": "mrkdwn", "text": f"*Branch:* `{ref_name}`"},
+                          {"type": "mrkdwn", "text": f"*Commit:* `{sha}`"},
+                          {"type": "mrkdwn", "text": f"*Actor:* `{actor}`"}
+                      ]
+                  },
+                  {
+                      "type": "section",
+                      "text": {
+                          "type": "mrkdwn",
+                          "text": (
+                              "*Useful links*\n"
+                              f"• Maven Central: <https://central.sonatype.com/artifact/io.facturapi/facturapi-java/{version}|View artifact>\n"
+                              f"• Workflow run: <{server_url}/{repo}/actions/runs/{run_id}|Open run>\n"
+                              f"• Changelog: <{server_url}/{repo}/blob/main/CHANGELOG.md|Read changes>"
+                          )
+                      }
+                  },
+                  {
+                      "type": "section",
+                      "text": {
+                          "type": "mrkdwn",
+                          "text": f"*Latest changes*\n{latest_changes}"
+                      }
+                  }
+              ]
+          }
+
+          Path("/tmp/slack_payload.json").write_text(json.dumps(payload), encoding="utf-8")
+          PY
+
+          curl -sS -X POST -H "Content-type: application/json" --data "@/tmp/slack_payload.json" "$SLACK_DEPLOY_WEBHOOK_URL"
+
+      - name: Notify Slack (failure)
+        if: steps.gate.outputs.publish == 'true' && failure()
+        env:
+          SLACK_DEPLOY_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOY_WEBHOOK_URL }}
+          VERSION: ${{ steps.gate.outputs.current_version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${SLACK_DEPLOY_WEBHOOK_URL:-}" ]; then
+            echo "SLACK_DEPLOY_WEBHOOK_URL not set; skipping Slack notification"
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          server_url = os.environ["GITHUB_SERVER_URL"]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          run_id = os.environ["GITHUB_RUN_ID"]
+          sha = os.environ["GITHUB_SHA"]
+
+          payload = {
+              "text": f"❌ Facturapi Java SDK {version} publish failed",
+              "blocks": [
+                  {
+                      "type": "section",
+                      "text": {
+                          "type": "mrkdwn",
+                          "text": (
+                              f"❌ *Java SDK {version} publish failed*\n"
+                              f"• Workflow run: <{server_url}/{repo}/actions/runs/{run_id}|Open run>\n"
+                              f"• Commit: `{sha}`"
+                          )
+                      }
+                  }
+              ]
+          }
+
+          Path("/tmp/slack_payload_failure.json").write_text(json.dumps(payload), encoding="utf-8")
+          PY
+          curl -sS -X POST -H "Content-type: application/json" --data "@/tmp/slack_payload_failure.json" "$SLACK_DEPLOY_WEBHOOK_URL"
+
       - name: Skip publish
         if: steps.gate.outputs.publish != 'true'
         run: |
