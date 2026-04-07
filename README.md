@@ -51,6 +51,24 @@ var invoice = facturapi.invoices().create(Map.of(
 System.out.println(invoice.getId());
 ```
 
+## Uploads
+
+```java
+import java.io.File;
+
+var organization = facturapi.organizations().uploadLogo(
+  "org_123",
+  new File("logo.png")
+);
+
+var updated = facturapi.organizations().uploadCertificate(
+  "org_123",
+  new File("certificate.cer"),
+  new File("certificate.key"),
+  "secret"
+);
+```
+
 ## Design
 
 - Inputs use flexible JSON dictionaries (`Map<String, Object>`).

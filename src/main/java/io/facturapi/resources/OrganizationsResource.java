@@ -90,15 +90,15 @@ public class OrganizationsResource extends BaseResource {
    * Uploads organization logo file.
    */
   public Organization uploadLogo(String id, File file) throws IOException {
-    return uploadLogo(id, Files.readAllBytes(file.toPath()), file.getName());
+    return uploadLogo(id, Files.readAllBytes(file.toPath()));
   }
 
   /**
    * Uploads organization logo file bytes.
    */
-  public Organization uploadLogo(String id, byte[] fileBytes, String fileName) {
+  public Organization uploadLogo(String id, byte[] fileBytes) {
     MultipartBody multipartBody = new MultipartBodyBuilder()
-      .addFile("file", fileName, fileBytes, "application/octet-stream")
+      .addFile("file", "logo.jpg", fileBytes, "application/octet-stream")
       .build();
     return client.putMultipart("/organizations/" + id + "/logo", multipartBody, Organization.class);
   }
@@ -110,9 +110,7 @@ public class OrganizationsResource extends BaseResource {
     return uploadCertificate(
       id,
       Files.readAllBytes(cerFile.toPath()),
-      cerFile.getName(),
       Files.readAllBytes(keyFile.toPath()),
-      keyFile.getName(),
       password
     );
   }
@@ -120,17 +118,10 @@ public class OrganizationsResource extends BaseResource {
   /**
    * Uploads organization CSD certificate file bytes.
    */
-  public Organization uploadCertificate(
-    String id,
-    byte[] cerFileBytes,
-    String cerFileName,
-    byte[] keyFileBytes,
-    String keyFileName,
-    String password
-  ) {
+  public Organization uploadCertificate(String id, byte[] cerFileBytes, byte[] keyFileBytes, String password) {
     MultipartBody multipartBody = new MultipartBodyBuilder()
-      .addFile("cer", cerFileName, cerFileBytes, "application/octet-stream")
-      .addFile("key", keyFileName, keyFileBytes, "application/octet-stream")
+      .addFile("cer", "certificate.cer", cerFileBytes, "application/octet-stream")
+      .addFile("key", "certificate.key", keyFileBytes, "application/octet-stream")
       .addField("password", password)
       .build();
     return client.putMultipart("/organizations/" + id + "/certificate", multipartBody, Organization.class);

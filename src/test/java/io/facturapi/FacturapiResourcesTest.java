@@ -73,7 +73,7 @@ class FacturapiResourcesTest {
         .build()
     );
 
-    var response = sdk.organizations().uploadLogo("org_1", "logo-bytes".getBytes(StandardCharsets.UTF_8), "logo.png");
+    var response = sdk.organizations().uploadLogo("org_1", "logo-bytes".getBytes(StandardCharsets.UTF_8));
 
     assertEquals("org_1", response.getId());
     assertEquals("PUT", httpClient.requests().get(0).method());
@@ -94,9 +94,7 @@ class FacturapiResourcesTest {
     var response = sdk.organizations().uploadCertificate(
       "org_1",
       "cer-bytes".getBytes(StandardCharsets.UTF_8),
-      "certificate.cer",
       "key-bytes".getBytes(StandardCharsets.UTF_8),
-      "certificate.key",
       "secret"
     );
 
