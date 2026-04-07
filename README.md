@@ -69,10 +69,30 @@ var updated = facturapi.organizations().uploadCertificate(
 );
 ```
 
+## Errors
+
+```java
+import io.facturapi.FacturapiException;
+
+try {
+  facturapi.customers().retrieve("cus_123");
+} catch (FacturapiException e) {
+  System.out.println(e.getMessage());
+
+  var apiError = e.getApiError();
+  if (apiError != null) {
+    System.out.println(apiError.getStatus());
+    System.out.println(apiError.getCode());
+    System.out.println(apiError.getPath());
+  }
+}
+```
+
 ## Design
 
 - Inputs use flexible JSON dictionaries (`Map<String, Object>`).
 - Outputs are typed Java models (`Invoice`, `Customer`, `SearchResult<T>`, etc.).
+- Errors expose the API error payload when the response body is JSON.
 - Auth uses `Authorization: Bearer <apiKey>`.
 
 ## Configuration
