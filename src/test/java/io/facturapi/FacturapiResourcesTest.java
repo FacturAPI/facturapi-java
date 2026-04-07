@@ -63,6 +63,49 @@ class FacturapiResourcesTest {
   }
 
   @Test
+  void organizationUploadsAcceptBytes() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"org_1\"}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient)
+        .build()
+    );
+
+    var response = sdk.organizations().uploadLogo("org_1", "logo-bytes".getBytes(StandardCharsets.UTF_8), "logo.png");
+
+    assertEquals("org_1", response.getId());
+    assertEquals("PUT", httpClient.requests().get(0).method());
+    assertEquals("/v2/organizations/org_1/logo", httpClient.requests().get(0).uri().getPath());
+  }
+
+  @Test
+  void organizationCertificateUploadsAcceptBytes() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"org_1\"}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient)
+        .build()
+    );
+
+    var response = sdk.organizations().uploadCertificate(
+      "org_1",
+      "cer-bytes".getBytes(StandardCharsets.UTF_8),
+      "certificate.cer",
+      "key-bytes".getBytes(StandardCharsets.UTF_8),
+      "certificate.key",
+      "secret"
+    );
+
+    assertEquals("org_1", response.getId());
+    assertEquals("PUT", httpClient.requests().get(0).method());
+    assertEquals("/v2/organizations/org_1/certificate", httpClient.requests().get(0).uri().getPath());
+  }
+
+  @Test
   void sdkExposesAccessorBasedSurface() {
     Facturapi sdk = new Facturapi(
       FacturapiConfig.builder("sk_test")

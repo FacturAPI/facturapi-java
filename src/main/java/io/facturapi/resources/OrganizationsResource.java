@@ -14,9 +14,9 @@ import io.facturapi.models.OrganizationTeamRoleTemplate;
 import io.facturapi.models.OrganizationUserAccess;
 import io.facturapi.models.SearchResult;
 import io.facturapi.models.Series;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -89,10 +89,16 @@ public class OrganizationsResource extends BaseResource {
   /**
    * Uploads organization logo file.
    */
-  public Organization uploadLogo(String id, Path filePath) throws IOException {
-    byte[] fileBytes = Files.readAllBytes(filePath);
+  public Organization uploadLogo(String id, File file) throws IOException {
+    return uploadLogo(id, Files.readAllBytes(file.toPath()), file.getName());
+  }
+
+  /**
+   * Uploads organization logo file bytes.
+   */
+  public Organization uploadLogo(String id, byte[] fileBytes, String fileName) {
     MultipartBody multipartBody = new MultipartBodyBuilder()
-      .addFile("file", filePath.getFileName().toString(), fileBytes, "application/octet-stream")
+      .addFile("file", fileName, fileBytes, "application/octet-stream")
       .build();
     return client.putMultipart("/organizations/" + id + "/logo", multipartBody, Organization.class);
   }
@@ -100,10 +106,31 @@ public class OrganizationsResource extends BaseResource {
   /**
    * Uploads organization CSD certificate files.
    */
-  public Organization uploadCertificate(String id, Path cerFile, Path keyFile, String password) throws IOException {
+  public Organization uploadCertificate(String id, File cerFile, File keyFile, String password) throws IOException {
+    return uploadCertificate(
+      id,
+      Files.readAllBytes(cerFile.toPath()),
+      cerFile.getName(),
+      Files.readAllBytes(keyFile.toPath()),
+      keyFile.getName(),
+      password
+    );
+  }
+
+  /**
+   * Uploads organization CSD certificate file bytes.
+   */
+  public Organization uploadCertificate(
+    String id,
+    byte[] cerFileBytes,
+    String cerFileName,
+    byte[] keyFileBytes,
+    String keyFileName,
+    String password
+  ) {
     MultipartBody multipartBody = new MultipartBodyBuilder()
-      .addFile("cer", cerFile.getFileName().toString(), Files.readAllBytes(cerFile), "application/octet-stream")
-      .addFile("key", keyFile.getFileName().toString(), Files.readAllBytes(keyFile), "application/octet-stream")
+      .addFile("cer", cerFileName, cerFileBytes, "application/octet-stream")
+      .addFile("key", keyFileName, keyFileBytes, "application/octet-stream")
       .addField("password", password)
       .build();
     return client.putMultipart("/organizations/" + id + "/certificate", multipartBody, Organization.class);
