@@ -2,6 +2,7 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +18,9 @@ public class OrganizationUserAccess {
   private String organization;
   private List<String> operations = new ArrayList<>();
   @JsonProperty("created_at")
-  private String createdAt;
+  private Instant createdAt;
   @JsonProperty("updated_at")
-  private String updatedAt;
+  private Instant updatedAt;
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
@@ -35,8 +36,8 @@ public class OrganizationUserAccess {
   public void setOrganization(String organization) { this.organization = organization; }
   public List<String> getOperations() { return operations; }
   public void setOperations(List<String> operations) { this.operations = operations; }
-  public String getCreatedAt() { return createdAt; }
-  public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-  public String getUpdatedAt() { return updatedAt; }
-  public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+  public Instant getCreatedAt() { return createdAt; }
+  public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+  public Instant getUpdatedAt() { return updatedAt; }
+  public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }

@@ -2,6 +2,7 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
 public class Webhook {
   private String id;
   @JsonProperty("created_at")
-  private String createdAt;
+  private Instant createdAt;
   private String organization;
   private Boolean livemode;
   @JsonProperty("enabled_events")
@@ -21,8 +22,8 @@ public class Webhook {
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
-  public String getCreatedAt() { return createdAt; }
-  public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+  public Instant getCreatedAt() { return createdAt; }
+  public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
   public String getOrganization() { return organization; }
   public void setOrganization(String organization) { this.organization = organization; }
   public Boolean getLivemode() { return livemode; }

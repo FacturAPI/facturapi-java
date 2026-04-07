@@ -2,6 +2,7 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ public class Payment {
   private String paymentForm;
   private String currency;
   private Double exchange;
-  private String date;
+  private Instant date;
   private List<PaymentRelated> related = new ArrayList<>();
 
   public String getPaymentForm() { return paymentForm; }
@@ -20,8 +21,8 @@ public class Payment {
   public void setCurrency(String currency) { this.currency = currency; }
   public Double getExchange() { return exchange; }
   public void setExchange(Double exchange) { this.exchange = exchange; }
-  public String getDate() { return date; }
-  public void setDate(String date) { this.date = date; }
+  public Instant getDate() { return date; }
+  public void setDate(Instant date) { this.date = date; }
   public List<PaymentRelated> getRelated() { return related; }
   public void setRelated(List<PaymentRelated> related) { this.related = related; }
 }

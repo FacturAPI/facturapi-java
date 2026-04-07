@@ -2,6 +2,7 @@ package io.facturapi.models.complements.nomina;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ public class NominaReceptor {
   @JsonProperty("num_seguridad_social")
   private String numSeguridadSocial;
   @JsonProperty("fecha_inicio_rel_laboral")
-  private String fechaInicioRelLaboral;
+  private LocalDate fechaInicioRelLaboral;
   private Object antiguedad;
   @JsonProperty("tipo_contrato")
   private String tipoContrato;
@@ -46,8 +47,8 @@ public class NominaReceptor {
   public void setCurp(String curp) { this.curp = curp; }
   public String getNumSeguridadSocial() { return numSeguridadSocial; }
   public void setNumSeguridadSocial(String numSeguridadSocial) { this.numSeguridadSocial = numSeguridadSocial; }
-  public String getFechaInicioRelLaboral() { return fechaInicioRelLaboral; }
-  public void setFechaInicioRelLaboral(String fechaInicioRelLaboral) { this.fechaInicioRelLaboral = fechaInicioRelLaboral; }
+  public LocalDate getFechaInicioRelLaboral() { return fechaInicioRelLaboral; }
+  public void setFechaInicioRelLaboral(LocalDate fechaInicioRelLaboral) { this.fechaInicioRelLaboral = fechaInicioRelLaboral; }
   public Object getAntiguedad() { return antiguedad; }
   public void setAntiguedad(Object antiguedad) { this.antiguedad = antiguedad; }
   public String getTipoContrato() { return tipoContrato; }

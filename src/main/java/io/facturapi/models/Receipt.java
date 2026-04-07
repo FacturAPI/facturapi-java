@@ -2,6 +2,7 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,8 +10,8 @@ import java.util.List;
 public class Receipt {
   private String id;
   @JsonProperty("created_at")
-  private String createdAt;
-  private String date;
+  private Instant createdAt;
+  private Instant date;
   @JsonProperty("api_version")
   private Integer apiVersion;
   private Boolean livemode;
@@ -30,7 +31,7 @@ public class Receipt {
   private Double total;
   private String invoice;
   @JsonProperty("expires_at")
-  private String expiresAt;
+  private Instant expiresAt;
   private String key;
   private String status;
   @JsonProperty("self_invoice_url")
@@ -38,10 +39,10 @@ public class Receipt {
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
-  public String getCreatedAt() { return createdAt; }
-  public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-  public String getDate() { return date; }
-  public void setDate(String date) { this.date = date; }
+  public Instant getCreatedAt() { return createdAt; }
+  public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+  public Instant getDate() { return date; }
+  public void setDate(Instant date) { this.date = date; }
   public Integer getApiVersion() { return apiVersion; }
   public void setApiVersion(Integer apiVersion) { this.apiVersion = apiVersion; }
   public Boolean getLivemode() { return livemode; }
@@ -68,8 +69,8 @@ public class Receipt {
   public void setTotal(Double total) { this.total = total; }
   public String getInvoice() { return invoice; }
   public void setInvoice(String invoice) { this.invoice = invoice; }
-  public String getExpiresAt() { return expiresAt; }
-  public void setExpiresAt(String expiresAt) { this.expiresAt = expiresAt; }
+  public Instant getExpiresAt() { return expiresAt; }
+  public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
   public String getKey() { return key; }
   public void setKey(String key) { this.key = key; }
   public String getStatus() { return status; }

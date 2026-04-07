@@ -2,10 +2,11 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Stamp {
-  private String date;
+  private Instant date;
   @JsonProperty("sat_signature")
   private String satSignature;
   @JsonProperty("sat_cert_number")
@@ -16,8 +17,8 @@ public class Stamp {
   @JsonProperty("rfc_provider_cert")
   private String rfcProviderCert;
 
-  public String getDate() { return date; }
-  public void setDate(String date) { this.date = date; }
+  public Instant getDate() { return date; }
+  public void setDate(Instant date) { this.date = date; }
   public String getSatSignature() { return satSignature; }
   public void setSatSignature(String satSignature) { this.satSignature = satSignature; }
   public String getSatCertNumber() { return satCertNumber; }

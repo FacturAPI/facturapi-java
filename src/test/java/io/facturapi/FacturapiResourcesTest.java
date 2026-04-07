@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.facturapi.http.FacturapiConfig;
+import io.facturapi.models.Customer;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +30,26 @@ class FacturapiResourcesTest {
     var request = httpClient.requests().get(0);
     assertEquals("POST", request.method());
     assertEquals("/v2/invoices?test=true", request.uri().getPath() + "?" + request.uri().getQuery());
+  }
+
+  @Test
+  void sdkExposesAccessorBasedSurface() {
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(new StubHttpClient())
+        .build()
+    );
+
+    assertNotNull(sdk.customers());
+    assertNotNull(sdk.invoices());
+    assertNotNull(sdk.receipts());
+    assertNotNull(sdk.retentions());
+    assertNotNull(sdk.webhooks());
+    assertNotNull(sdk.organizations());
+    assertNotNull(sdk.catalogs());
+    assertNotNull(sdk.cartaPorteCatalogs());
+    assertNotNull(sdk.comercioExteriorCatalogs());
+    assertNotNull(sdk.tools());
   }
 
   @Test
@@ -53,9 +76,9 @@ class FacturapiResourcesTest {
     StubHttpClient httpClient = new StubHttpClient();
     httpClient.enqueueJson(
       200,
-      "{\"id\":\"inv_1\",\"complements\":[" +
-      "{\"type\":\"pago\",\"data\":[{\"payment_form\":\"03\",\"date\":\"2026-04-07\",\"currency\":\"MXN\",\"exchange\":1,\"related_documents\":[{\"uuid\":\"f03d5c3f-a93b-443f-927f-e89db2f7f58a\",\"amount\":100,\"installment\":1,\"last_balance\":100,\"currency\":\"MXN\",\"exchange\":1,\"taxes\":[{\"base\":100,\"rate\":0.16,\"type\":\"IVA\",\"factor\":\"Tasa\",\"withholding\":false}]}]}]}," +
-      "{\"type\":\"nomina\",\"data\":{\"tipo_nomina\":\"O\",\"fecha_pago\":\"2026-04-01\",\"fecha_inicial_pago\":\"2026-03-16\",\"fecha_final_pago\":\"2026-03-31\",\"num_dias_pagados\":15,\"receptor\":{\"curp\":\"TEST900101HDFABC01\",\"tipo_contrato\":\"01\",\"tipo_regimen\":\"02\",\"num_empleado\":\"EMP-1\",\"periodicidad_pago\":\"04\",\"clave_ent_fed\":\"CMX\"},\"percepciones\":{\"percepcion\":[{\"tipo_percepcion\":\"001\",\"clave\":\"P001\",\"importe_gravado\":1000,\"importe_exento\":0}]},\"deducciones\":[{\"tipo_deduccion\":\"002\",\"clave\":\"D001\",\"importe\":100}]}}," +
+      "{\"id\":\"inv_1\",\"created_at\":\"2026-04-07T10:00:00Z\",\"date\":\"2026-04-07T12:30:00Z\",\"complements\":[" +
+      "{\"type\":\"pago\",\"data\":[{\"payment_form\":\"03\",\"date\":\"2026-04-07T13:45:00Z\",\"currency\":\"MXN\",\"exchange\":1,\"related_documents\":[{\"uuid\":\"f03d5c3f-a93b-443f-927f-e89db2f7f58a\",\"amount\":100,\"installment\":1,\"last_balance\":100,\"currency\":\"MXN\",\"exchange\":1,\"taxes\":[{\"base\":100,\"rate\":0.16,\"type\":\"IVA\",\"factor\":\"Tasa\",\"withholding\":false}]}]}]}," +
+      "{\"type\":\"nomina\",\"data\":{\"tipo_nomina\":\"O\",\"fecha_pago\":\"2026-04-01\",\"fecha_inicial_pago\":\"2026-03-16\",\"fecha_final_pago\":\"2026-03-31\",\"num_dias_pagados\":15,\"receptor\":{\"curp\":\"TEST900101HDFABC01\",\"tipo_contrato\":\"01\",\"tipo_regimen\":\"02\",\"num_empleado\":\"EMP-1\",\"periodicidad_pago\":\"04\",\"clave_ent_fed\":\"CMX\",\"fecha_inicio_rel_laboral\":\"2026-01-01\"},\"percepciones\":{\"percepcion\":[{\"tipo_percepcion\":\"001\",\"clave\":\"P001\",\"importe_gravado\":1000,\"importe_exento\":0}]},\"deducciones\":[{\"tipo_deduccion\":\"002\",\"clave\":\"D001\",\"importe\":100}]}}," +
       "{\"type\":\"custom\",\"data\":\"<my:Complement xmlns:my=\\\"https://example.com\\\"/>\"}," +
       "{\"type\":\"carta_porte\",\"data\":{\"IdCCP\":\"CPC2026040700001\",\"TranspInternac\":\"No\",\"TotalDistRec\":15.4,\"Ubicaciones\":[],\"Mercancias\":{\"Mercancia\":[]}}}," +
       "{\"type\":\"comercio_exterior\",\"data\":{\"Version\":\"2.0\",\"ClaveDePedimento\":\"A1\",\"CertificadoOrigen\":0,\"TipoCambioUSD\":16.9,\"TotalUSD\":100.5,\"Emisor\":true,\"Propietario\":[{\"id\":\"cus_owner_1\"}],\"Receptor\":{\"NumRegIdTrib\":\"EXT12345\"},\"Destinatario\":[{\"Nombre\":\"Receiver Inc\",\"Domicilio\":[{\"Calle\":\"Main\",\"Estado\":\"TX\",\"Pais\":\"USA\",\"CodigoPostal\":\"77001\"}]}],\"Mercancias\":{\"Mercancia\":[{\"NoIdentificacion\":\"SKU-1\",\"ValorDolares\":100.5}]}}}" +
@@ -69,6 +92,8 @@ class FacturapiResourcesTest {
     );
 
     var invoice = sdk.invoices().retrieve("inv_1");
+    assertEquals(Instant.parse("2026-04-07T10:00:00Z"), invoice.getCreatedAt());
+    assertEquals(Instant.parse("2026-04-07T12:30:00Z"), invoice.getDate());
     assertEquals(5, invoice.getComplements().size());
 
     var pago = invoice.getComplements().get(0);
@@ -76,6 +101,7 @@ class FacturapiResourcesTest {
     assertNotNull(pago.getPagoData());
     assertEquals(1, pago.getPagoData().size());
     assertEquals("03", pago.getPagoData().get(0).getPaymentForm());
+    assertEquals(Instant.parse("2026-04-07T13:45:00Z"), pago.getPagoData().get(0).getDate());
     assertEquals("f03d5c3f-a93b-443f-927f-e89db2f7f58a", pago.getPagoData().get(0).getRelatedDocuments().get(0).getUuid());
     assertInstanceOf(java.util.List.class, pago.getData());
 
@@ -84,6 +110,10 @@ class FacturapiResourcesTest {
     assertNotNull(nomina.getNominaData());
     assertEquals("O", nomina.getNominaData().getTipoNomina());
     assertEquals("EMP-1", nomina.getNominaData().getReceptor().getNumEmpleado());
+    assertEquals(LocalDate.parse("2026-01-01"), nomina.getNominaData().getReceptor().getFechaInicioRelLaboral());
+    assertEquals(LocalDate.parse("2026-04-01"), nomina.getNominaData().getFechaPago());
+    assertEquals(LocalDate.parse("2026-03-16"), nomina.getNominaData().getFechaInicialPago());
+    assertEquals(LocalDate.parse("2026-03-31"), nomina.getNominaData().getFechaFinalPago());
     assertEquals("001", nomina.getNominaData().getPercepciones().getPercepcion().get(0).getTipoPercepcion());
 
     var custom = invoice.getComplements().get(2);
@@ -108,5 +138,19 @@ class FacturapiResourcesTest {
     assertEquals(Boolean.TRUE, comercioExterior.getComercioExteriorData().getEmisorFromOrganization());
     assertEquals("cus_owner_1", comercioExterior.getComercioExteriorData().getPropietario().get(0).getId());
     assertEquals("SKU-1", comercioExterior.getComercioExteriorData().getMercancias().getMercancia().get(0).getNoIdentificacion());
+  }
+
+  @Test
+  void objectMapperDeserializesJavaTimeTypes() throws Exception {
+    var mapper = FacturapiConfig.builder("sk_test").build().getObjectMapper();
+
+    var customer = mapper.readValue(
+      "{\"created_at\":\"2026-04-07T10:11:12Z\",\"sat_validated_at\":\"2026-04-07T11:11:12Z\",\"edit_link_expires_at\":\"2026-04-08T00:00:00Z\"}",
+      Customer.class
+    );
+
+    assertEquals(Instant.parse("2026-04-07T10:11:12Z"), customer.getCreatedAt());
+    assertEquals(Instant.parse("2026-04-07T11:11:12Z"), customer.getSatValidatedAt());
+    assertEquals(Instant.parse("2026-04-08T00:00:00Z"), customer.getEditLinkExpiresAt());
   }
 }

@@ -2,6 +2,7 @@ package io.facturapi.models.complements.pago;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
 public class PagoComplementData {
   @JsonProperty("payment_form")
   private String paymentForm;
-  private String date;
+  private Instant date;
   @JsonProperty("related_documents")
   private List<PaymentRelatedDocument> relatedDocuments = new ArrayList<>();
   private String currency;
@@ -27,8 +28,8 @@ public class PagoComplementData {
 
   public String getPaymentForm() { return paymentForm; }
   public void setPaymentForm(String paymentForm) { this.paymentForm = paymentForm; }
-  public String getDate() { return date; }
-  public void setDate(String date) { this.date = date; }
+  public Instant getDate() { return date; }
+  public void setDate(Instant date) { this.date = date; }
   public List<PaymentRelatedDocument> getRelatedDocuments() { return relatedDocuments; }
   public void setRelatedDocuments(List<PaymentRelatedDocument> relatedDocuments) { this.relatedDocuments = relatedDocuments; }
   public String getCurrency() { return currency; }

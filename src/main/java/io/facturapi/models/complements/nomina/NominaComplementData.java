@@ -2,15 +2,16 @@ package io.facturapi.models.complements.nomina;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominaComplementData {
   @JsonProperty("fecha_inicial_pago")
-  private String fechaInicialPago;
+  private LocalDate fechaInicialPago;
   @JsonProperty("fecha_final_pago")
-  private String fechaFinalPago;
+  private LocalDate fechaFinalPago;
   private NominaPercepciones percepciones;
   private List<NominaDeduccion> deducciones = new ArrayList<>();
   @JsonProperty("otros_pagos")
@@ -21,14 +22,14 @@ public class NominaComplementData {
   @JsonProperty("tipo_nomina")
   private String tipoNomina;
   @JsonProperty("fecha_pago")
-  private String fechaPago;
+  private LocalDate fechaPago;
   @JsonProperty("num_dias_pagados")
   private Double numDiasPagados;
 
-  public String getFechaInicialPago() { return fechaInicialPago; }
-  public void setFechaInicialPago(String fechaInicialPago) { this.fechaInicialPago = fechaInicialPago; }
-  public String getFechaFinalPago() { return fechaFinalPago; }
-  public void setFechaFinalPago(String fechaFinalPago) { this.fechaFinalPago = fechaFinalPago; }
+  public LocalDate getFechaInicialPago() { return fechaInicialPago; }
+  public void setFechaInicialPago(LocalDate fechaInicialPago) { this.fechaInicialPago = fechaInicialPago; }
+  public LocalDate getFechaFinalPago() { return fechaFinalPago; }
+  public void setFechaFinalPago(LocalDate fechaFinalPago) { this.fechaFinalPago = fechaFinalPago; }
   public NominaPercepciones getPercepciones() { return percepciones; }
   public void setPercepciones(NominaPercepciones percepciones) { this.percepciones = percepciones; }
   public List<NominaDeduccion> getDeducciones() { return deducciones; }
@@ -43,8 +44,8 @@ public class NominaComplementData {
   public void setReceptor(NominaReceptor receptor) { this.receptor = receptor; }
   public String getTipoNomina() { return tipoNomina; }
   public void setTipoNomina(String tipoNomina) { this.tipoNomina = tipoNomina; }
-  public String getFechaPago() { return fechaPago; }
-  public void setFechaPago(String fechaPago) { this.fechaPago = fechaPago; }
+  public LocalDate getFechaPago() { return fechaPago; }
+  public void setFechaPago(LocalDate fechaPago) { this.fechaPago = fechaPago; }
   public Double getNumDiasPagados() { return numDiasPagados; }
   public void setNumDiasPagados(Double numDiasPagados) { this.numDiasPagados = numDiasPagados; }
 }

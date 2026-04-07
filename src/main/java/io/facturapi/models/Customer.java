@@ -2,6 +2,7 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Customer {
@@ -9,7 +10,7 @@ public class Customer {
   private String organization;
   private Boolean livemode;
   @JsonProperty("created_at")
-  private String createdAt;
+  private Instant createdAt;
   @JsonProperty("tax_id")
   private String taxId;
   @JsonProperty("tax_system")
@@ -25,11 +26,11 @@ public class Customer {
   @JsonProperty("default_invoice_use")
   private String defaultInvoiceUse;
   @JsonProperty("sat_validated_at")
-  private String satValidatedAt;
+  private Instant satValidatedAt;
   @JsonProperty("edit_link")
   private String editLink;
   @JsonProperty("edit_link_expires_at")
-  private String editLinkExpiresAt;
+  private Instant editLinkExpiresAt;
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
@@ -37,8 +38,8 @@ public class Customer {
   public void setOrganization(String organization) { this.organization = organization; }
   public Boolean getLivemode() { return livemode; }
   public void setLivemode(Boolean livemode) { this.livemode = livemode; }
-  public String getCreatedAt() { return createdAt; }
-  public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+  public Instant getCreatedAt() { return createdAt; }
+  public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
   public String getTaxId() { return taxId; }
   public void setTaxId(String taxId) { this.taxId = taxId; }
   public String getTaxSystem() { return taxSystem; }
@@ -57,10 +58,10 @@ public class Customer {
   public void setExternalId(String externalId) { this.externalId = externalId; }
   public String getDefaultInvoiceUse() { return defaultInvoiceUse; }
   public void setDefaultInvoiceUse(String defaultInvoiceUse) { this.defaultInvoiceUse = defaultInvoiceUse; }
-  public String getSatValidatedAt() { return satValidatedAt; }
-  public void setSatValidatedAt(String satValidatedAt) { this.satValidatedAt = satValidatedAt; }
+  public Instant getSatValidatedAt() { return satValidatedAt; }
+  public void setSatValidatedAt(Instant satValidatedAt) { this.satValidatedAt = satValidatedAt; }
   public String getEditLink() { return editLink; }
   public void setEditLink(String editLink) { this.editLink = editLink; }
-  public String getEditLinkExpiresAt() { return editLinkExpiresAt; }
-  public void setEditLinkExpiresAt(String editLinkExpiresAt) { this.editLinkExpiresAt = editLinkExpiresAt; }
+  public Instant getEditLinkExpiresAt() { return editLinkExpiresAt; }
+  public void setEditLinkExpiresAt(Instant editLinkExpiresAt) { this.editLinkExpiresAt = editLinkExpiresAt; }
 }

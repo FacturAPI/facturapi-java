@@ -2,6 +2,7 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +19,9 @@ public class OrganizationTeamRole {
   @JsonProperty("used_by")
   private Integer usedBy;
   @JsonProperty("created_at")
-  private String createdAt;
+  private Instant createdAt;
   @JsonProperty("updated_at")
-  private String updatedAt;
+  private Instant updatedAt;
   @JsonProperty("created_by")
   private Map<String, Object> createdBy;
   @JsonProperty("updated_by")
@@ -40,10 +41,10 @@ public class OrganizationTeamRole {
   public void setOperations(List<String> operations) { this.operations = operations; }
   public Integer getUsedBy() { return usedBy; }
   public void setUsedBy(Integer usedBy) { this.usedBy = usedBy; }
-  public String getCreatedAt() { return createdAt; }
-  public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-  public String getUpdatedAt() { return updatedAt; }
-  public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+  public Instant getCreatedAt() { return createdAt; }
+  public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+  public Instant getUpdatedAt() { return updatedAt; }
+  public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
   public Map<String, Object> getCreatedBy() { return createdBy; }
   public void setCreatedBy(Map<String, Object> createdBy) { this.createdBy = createdBy; }
   public Map<String, Object> getUpdatedBy() { return updatedBy; }

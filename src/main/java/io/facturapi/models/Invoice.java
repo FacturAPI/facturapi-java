@@ -2,9 +2,10 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.facturapi.models.complements.InvoiceComplement;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import io.facturapi.models.complements.InvoiceComplement;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Invoice {
@@ -12,8 +13,8 @@ public class Invoice {
   private String organization;
   private Boolean livemode;
   @JsonProperty("created_at")
-  private String createdAt;
-  private String date;
+  private Instant createdAt;
+  private Instant date;
   @JsonProperty("issuer_type")
   private String issuerType;
   private String type;
@@ -75,10 +76,10 @@ public class Invoice {
   public void setOrganization(String organization) { this.organization = organization; }
   public Boolean getLivemode() { return livemode; }
   public void setLivemode(Boolean livemode) { this.livemode = livemode; }
-  public String getCreatedAt() { return createdAt; }
-  public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-  public String getDate() { return date; }
-  public void setDate(String date) { this.date = date; }
+  public Instant getCreatedAt() { return createdAt; }
+  public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+  public Instant getDate() { return date; }
+  public void setDate(Instant date) { this.date = date; }
   public String getIssuerType() { return issuerType; }
   public void setIssuerType(String issuerType) { this.issuerType = issuerType; }
   public String getType() { return type; }

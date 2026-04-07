@@ -2,6 +2,7 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class Product {
   private String description;
   private Double price;
   @JsonProperty("created_at")
-  private String createdAt;
+  private Instant createdAt;
   @JsonProperty("tax_included")
   private Boolean taxIncluded;
   private List<Tax> taxes = new ArrayList<>();
@@ -40,8 +41,8 @@ public class Product {
   public void setDescription(String description) { this.description = description; }
   public Double getPrice() { return price; }
   public void setPrice(Double price) { this.price = price; }
-  public String getCreatedAt() { return createdAt; }
-  public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+  public Instant getCreatedAt() { return createdAt; }
+  public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
   public Boolean getTaxIncluded() { return taxIncluded; }
   public void setTaxIncluded(Boolean taxIncluded) { this.taxIncluded = taxIncluded; }
   public List<Tax> getTaxes() { return taxes; }

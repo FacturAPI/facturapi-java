@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.facturapi.models.complements.carta_porte.CartaPorteComplementData;
 import io.facturapi.models.complements.comercio_exterior.ComercioExteriorComplementData;
 import io.facturapi.models.complements.nomina.NominaComplementData;
@@ -17,6 +18,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InvoiceComplement {
   private static final ObjectMapper MAPPER = new ObjectMapper()
+    .registerModule(new JavaTimeModule())
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
   private String type;

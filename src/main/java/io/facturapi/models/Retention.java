@@ -2,6 +2,7 @@ package io.facturapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
 public class Retention {
   private String id;
   @JsonProperty("created_at")
-  private String createdAt;
+  private Instant createdAt;
   private CustomerInfo customer;
   private String organization;
   private Boolean livemode;
@@ -18,7 +19,7 @@ public class Retention {
   @JsonProperty("external_id")
   private String externalId;
   @JsonProperty("fecha_exp")
-  private String fechaExp;
+  private Instant fechaExp;
   @JsonProperty("cve_retenc")
   private String cveRetenc;
   @JsonProperty("folio_int")
@@ -42,8 +43,8 @@ public class Retention {
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
-  public String getCreatedAt() { return createdAt; }
-  public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+  public Instant getCreatedAt() { return createdAt; }
+  public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
   public CustomerInfo getCustomer() { return customer; }
   public void setCustomer(CustomerInfo customer) { this.customer = customer; }
   public String getOrganization() { return organization; }
@@ -56,8 +57,8 @@ public class Retention {
   public void setUuid(String uuid) { this.uuid = uuid; }
   public String getExternalId() { return externalId; }
   public void setExternalId(String externalId) { this.externalId = externalId; }
-  public String getFechaExp() { return fechaExp; }
-  public void setFechaExp(String fechaExp) { this.fechaExp = fechaExp; }
+  public Instant getFechaExp() { return fechaExp; }
+  public void setFechaExp(Instant fechaExp) { this.fechaExp = fechaExp; }
   public String getCveRetenc() { return cveRetenc; }
   public void setCveRetenc(String cveRetenc) { this.cveRetenc = cveRetenc; }
   public String getFolioInt() { return folioInt; }
