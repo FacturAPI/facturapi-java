@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   publish:
@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -41,6 +43,8 @@ jobs:
         run: |
           set -euo pipefail
 
+          python3 -m pip install --disable-pip-version-check --quiet semver
+
           python3 <<'PY' >> "$GITHUB_OUTPUT"
           import base64
           import os
@@ -48,6 +52,7 @@ jobs:
           import urllib.request
           import urllib.error
           import xml.etree.ElementTree as ET
+          import semver
 
           ns = {"m": "http://maven.apache.org/POM/4.0.0"}
           pom = ET.parse("pom.xml").getroot()
@@ -72,28 +77,22 @@ jobs:
           except Exception:
               latest = "0.0.0"
 
-          def parse_semver(value: str):
-              core = value.split("+", 1)[0]
-              main, _, prerelease = core.partition("-")
-              major, minor, patch = (int(part) for part in main.split(".")[:3])
-              return major, minor, patch, prerelease
+          def to_semver(value: str):
+              try:
+                  return semver.Version.parse(value)
+              except ValueError:
+                  return None
 
-          def is_greater(left: str, right: str) -> bool:
-              left_parts = parse_semver(left)
-              right_parts = parse_semver(right)
-              if left_parts[:3] != right_parts[:3]:
-                  return left_parts[:3] > right_parts[:3]
-              left_pre = left_parts[3]
-              right_pre = right_parts[3]
-              if left_pre == right_pre:
-                  return False
-              if not left_pre:
-                  return True
-              if not right_pre:
-                  return False
-              return left_pre > right_pre
+          current_semver = to_semver(version)
+          latest_semver = to_semver(latest) or semver.Version.parse("0.0.0")
+          if current_semver is None:
+              print(f"current_version={version}")
+              print(f"latest_version={latest}")
+              print("publish=false")
+              print("reason=current version is not valid semver")
+              sys.exit(0)
 
-          publish = is_greater(version, latest)
+          publish = current_semver > latest_semver
           reason = "current version is newer than published version"
           if publish:
               # If a deployment for this exact version is already staged/ongoing in the Portal,
@@ -133,6 +132,82 @@ jobs:
         if: steps.gate.outputs.publish == 'true'
         run: mvn -B -ntp -DskipTests -DpublishRelease=true deploy
 
+      - name: Ensure release tag is in sync
+        if: steps.gate.outputs.publish == 'true' && steps.publish_step.outcome == 'success'
+        env:
+          VERSION: ${{ steps.gate.outputs.current_version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="v${VERSION}"
+          current_sha="$(git rev-parse HEAD)"
+
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            tag_sha="$(git rev-list -n 1 "$tag")"
+            if [ "$tag_sha" != "$current_sha" ]; then
+              echo "::error::Tag $tag already exists at $tag_sha, expected $current_sha"
+              exit 1
+            fi
+            echo "Tag $tag already in sync with $current_sha"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "Release $tag"
+          git push origin "$tag"
+          echo "Created and pushed tag $tag"
+
+      - name: Create or update GitHub release notes
+        if: steps.gate.outputs.publish == 'true' && steps.publish_step.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.gate.outputs.current_version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="v${VERSION}"
+          notes_file="/tmp/release_notes.md"
+
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          header = f"## [{version}]"
+          changelog = Path("CHANGELOG.md")
+          output = Path("/tmp/release_notes.md")
+
+          if not changelog.exists():
+              output.write_text(f"Release {version}", encoding="utf-8")
+              raise SystemExit(0)
+
+          lines = changelog.read_text(encoding="utf-8").splitlines()
+          in_target = False
+          captured = []
+          for line in lines:
+              if line.startswith(header):
+                  in_target = True
+                  continue
+              if in_target and line.startswith("## ["):
+                  break
+              if in_target:
+                  captured.append(line)
+
+          notes = "\n".join(captured).strip()
+          if not notes:
+              notes = f"Release {version}"
+          output.write_text(notes + "\n", encoding="utf-8")
+          PY
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" --title "$tag" --notes-file "$notes_file"
+            echo "Updated release $tag"
+          else
+            gh release create "$tag" --title "$tag" --notes-file "$notes_file"
+            echo "Created release $tag"
+          fi
+
       - name: Notify Slack (success)
         if: steps.gate.outputs.publish == 'true' && steps.publish_step.outcome == 'success'
         env:
@@ -161,29 +236,30 @@ jobs:
 
           changelog = Path("CHANGELOG.md")
           latest_changes = "See CHANGELOG for details."
+          section_header = f"## [{version}]"
           if changelog.exists():
               lines = changelog.read_text(encoding="utf-8").splitlines()
-              in_latest = False
+              in_target = False
               bullets = []
               for line in lines:
-                  if line.startswith("## [") and not in_latest:
-                      in_latest = True
+                  if line.startswith(section_header):
+                      in_target = True
                       continue
-                  if in_latest and line.startswith("## ["):
+                  if in_target and line.startswith("## ["):
                       break
-                  if in_latest and line.startswith("- "):
+                  if in_target and line.startswith("- "):
                       bullets.append(line[2:].strip())
               if bullets:
                   latest_changes = "\n".join(f"• {b}" for b in bullets[:5])
 
           payload = {
-              "text": f"🚀 Facturapi Java SDK {version} published",
+              "text": f"🚀 Facturapi Java SDK {version} validated and submitted",
               "blocks": [
                   {
                       "type": "header",
                       "text": {
                           "type": "plain_text",
-                          "text": f"🚀 Java SDK {version} is live on Maven Central"
+                          "text": f"🚀 Java SDK {version} validated and submitted to Maven Central"
                       }
                   },
                   {
@@ -202,8 +278,9 @@ jobs:
                           "text": (
                               "*Useful links*\n"
                               f"• Maven Central: <https://central.sonatype.com/artifact/io.facturapi/facturapi-java/{version}|View artifact>\n"
+                              f"• Central deployment status: <https://central.sonatype.com/publishing/deployments|Check progress>\n"
                               f"• Workflow run: <{server_url}/{repo}/actions/runs/{run_id}|Open run>\n"
-                              f"• Changelog: <{server_url}/{repo}/blob/main/CHANGELOG.md|Read changes>"
+                              f"• Changelog: <{server_url}/{repo}/blob/{sha}/CHANGELOG.md|Read changes>"
                           )
                       }
                   },
