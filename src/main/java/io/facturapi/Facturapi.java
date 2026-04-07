@@ -23,18 +23,18 @@ import java.time.Duration;
 public class Facturapi {
   private final FacturapiHttpClient httpClient;
 
-  public final CustomersResource customers;
-  public final ProductsResource products;
-  public final InvoicesResource invoices;
-  public final OrganizationsResource organizations;
-  public final ReceiptsResource receipts;
-  public final RetentionsResource retentions;
-  public final WebhooksResource webhooks;
+  private final CustomersResource customers;
+  private final ProductsResource products;
+  private final InvoicesResource invoices;
+  private final OrganizationsResource organizations;
+  private final ReceiptsResource receipts;
+  private final RetentionsResource retentions;
+  private final WebhooksResource webhooks;
 
-  public final CatalogsTool catalogs;
-  public final CartaPorteCatalogsTool cartaPorteCatalogs;
-  public final ComercioExteriorCatalogsTool comercioExteriorCatalogs;
-  public final ToolsResource tools;
+  private final CatalogsTool catalogs;
+  private final CartaPorteCatalogsTool cartaPorteCatalogs;
+  private final ComercioExteriorCatalogsTool comercioExteriorCatalogs;
+  private final ToolsResource tools;
 
   /**
    * Creates a client using API v2.
@@ -84,6 +84,50 @@ public class Facturapi {
    */
   public static Builder builder(String apiKey) {
     return new Builder(apiKey);
+  }
+
+  public CustomersResource customers() {
+    return customers;
+  }
+
+  public ProductsResource products() {
+    return products;
+  }
+
+  public InvoicesResource invoices() {
+    return invoices;
+  }
+
+  public OrganizationsResource organizations() {
+    return organizations;
+  }
+
+  public ReceiptsResource receipts() {
+    return receipts;
+  }
+
+  public RetentionsResource retentions() {
+    return retentions;
+  }
+
+  public WebhooksResource webhooks() {
+    return webhooks;
+  }
+
+  public CatalogsTool catalogs() {
+    return catalogs;
+  }
+
+  public CartaPorteCatalogsTool cartaPorteCatalogs() {
+    return cartaPorteCatalogs;
+  }
+
+  public ComercioExteriorCatalogsTool comercioExteriorCatalogs() {
+    return comercioExteriorCatalogs;
+  }
+
+  public ToolsResource tools() {
+    return tools;
   }
 
   public static final class Builder {

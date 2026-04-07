@@ -36,14 +36,14 @@ import java.util.Map;
 
 Facturapi facturapi = new Facturapi("sk_test_...");
 
-var customer = facturapi.customers.create(Map.of(
+var customer = facturapi.customers().create(Map.of(
   "legal_name", "Mi Empresa SA de CV",
   "tax_id", "XAXX010101000",
   "tax_system", "601",
   "email", "cliente@example.com"
 ), null);
 
-var invoice = facturapi.invoices.create(Map.of(
+var invoice = facturapi.invoices().create(Map.of(
   "customer", customer.getId(),
   "items", java.util.List.of(Map.of("quantity", 1, "product", "prod_123"))
 ), null);

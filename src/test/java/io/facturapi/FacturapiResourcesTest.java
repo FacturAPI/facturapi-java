@@ -20,7 +20,7 @@ class FacturapiResourcesTest {
         .build()
     );
 
-    var response = sdk.invoices.create(Map.of("customer", "cus_1"), Map.of("test", true));
+    var response = sdk.invoices().create(Map.of("customer", "cus_1"), Map.of("test", true));
 
     assertEquals("inv_1", response.getId());
 
@@ -40,7 +40,7 @@ class FacturapiResourcesTest {
         .build()
     );
 
-    var response = sdk.organizations.listLiveApiKeys("org_1");
+    var response = sdk.organizations().listLiveApiKeys("org_1");
 
     assertEquals(1, response.size());
     assertNotNull(response.get(0).getId());
@@ -68,7 +68,7 @@ class FacturapiResourcesTest {
         .build()
     );
 
-    var invoice = sdk.invoices.retrieve("inv_1");
+    var invoice = sdk.invoices().retrieve("inv_1");
     assertEquals(5, invoice.getComplements().size());
 
     var pago = invoice.getComplements().get(0);
