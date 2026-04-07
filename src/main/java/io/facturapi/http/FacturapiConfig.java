@@ -7,9 +7,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.facturapi.ApiVersion;
 import io.facturapi.constants.FacturapiConstants;
-import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.Objects;
+import okhttp3.OkHttpClient;
 
 public final class FacturapiConfig {
   private final String apiKey;
@@ -17,7 +17,7 @@ public final class FacturapiConfig {
   private final String baseUrl;
   private final Duration timeout;
   private final String userAgent;
-  private final HttpClient httpClient;
+  private final OkHttpClient httpClient;
   private final ObjectMapper objectMapper;
 
   private FacturapiConfig(Builder builder) {
@@ -50,7 +50,7 @@ public final class FacturapiConfig {
     return userAgent;
   }
 
-  public HttpClient getHttpClient() {
+  public OkHttpClient getHttpClient() {
     return httpClient;
   }
 
@@ -68,7 +68,7 @@ public final class FacturapiConfig {
     private String baseUrl;
     private Duration timeout = Duration.ofSeconds(30);
     private final String userAgent = "facturapi-java/0.1.x";
-    private HttpClient httpClient;
+    private OkHttpClient httpClient;
     private ObjectMapper objectMapper;
 
     private Builder(String apiKey) {
@@ -93,7 +93,7 @@ public final class FacturapiConfig {
       return this;
     }
 
-    public Builder httpClient(HttpClient httpClient) {
+    public Builder httpClient(OkHttpClient httpClient) {
       this.httpClient = Objects.requireNonNull(httpClient, "httpClient is required");
       return this;
     }
@@ -103,8 +103,11 @@ public final class FacturapiConfig {
         ? FacturapiConstants.BASE_URL_V1
         : FacturapiConstants.BASE_URL_V2;
 
-      HttpClient resolvedClient = this.httpClient == null
-        ? HttpClient.newBuilder().connectTimeout(timeout).build()
+      OkHttpClient resolvedClient = this.httpClient == null
+        ? new OkHttpClient.Builder()
+          .connectTimeout(timeout)
+          .callTimeout(timeout)
+          .build()
         : this.httpClient;
 
       ObjectMapper resolvedMapper = new ObjectMapper()

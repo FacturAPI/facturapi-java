@@ -4,24 +4,28 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.facturapi.FacturapiException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
+import java.io.UncheckedIOException;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public final class FacturapiHttpClient {
-  private final HttpClient httpClient;
+  private static final MediaType JSON_MEDIA_TYPE = MediaType.get("application/json; charset=utf-8");
+
+  private final OkHttpClient httpClient;
   private final ObjectMapper objectMapper;
-  private final Duration timeout;
   private final String baseUrl;
   private final String apiKey;
   private final String userAgent;
@@ -29,7 +33,6 @@ public final class FacturapiHttpClient {
   public FacturapiHttpClient(FacturapiConfig config) {
     this.httpClient = config.getHttpClient();
     this.objectMapper = config.getObjectMapper();
-    this.timeout = config.getTimeout();
     this.baseUrl = config.getBaseUrl();
     this.apiKey = config.getApiKey();
     this.userAgent = config.getUserAgent();
@@ -98,62 +101,65 @@ public final class FacturapiHttpClient {
     Object body,
     MultipartBody multipartBody
   ) {
-    try {
-      HttpRequest request = buildRequest(method, path, queryParams, body, multipartBody);
-      HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-      validateResponse(response);
+    Request request = buildRequest(method, path, queryParams, body, multipartBody);
+    try (Response response = httpClient.newCall(request).execute()) {
+      if (!response.isSuccessful()) {
+        throw buildApiException(readBodyText(response), response.code());
+      }
 
-      byte[] responseBytes = response.body();
-      if (responseBytes == null || responseBytes.length == 0) {
+      ResponseBody responseBody = response.body();
+      if (responseBody == null) {
         return objectMapper.nullNode();
       }
 
-      String contentType = response.headers().firstValue("Content-Type").orElse("");
+      byte[] responseBytes = responseBody.bytes();
+      if (responseBytes.length == 0) {
+        return objectMapper.nullNode();
+      }
+
+      String contentType = responseBody.contentType() == null ? "" : responseBody.contentType().toString();
       if (!contentType.contains("application/json")) {
         return objectMapper.valueToTree(new String(responseBytes, StandardCharsets.UTF_8));
       }
       return objectMapper.readTree(responseBytes);
     } catch (IOException e) {
       throw new FacturapiException("I/O error when calling Facturapi API", e);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new FacturapiException("Request interrupted", e);
     }
   }
 
   private byte[] requestBytes(String method, String path, Object body) {
-    try {
-      HttpRequest request = buildRequest(method, path, null, body, null);
-      HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-      validateResponse(response);
-      return response.body();
+    Request request = buildRequest(method, path, null, body, null);
+    try (Response response = httpClient.newCall(request).execute()) {
+      if (!response.isSuccessful()) {
+        throw buildApiException(readBodyText(response), response.code());
+      }
+      ResponseBody responseBody = response.body();
+      return responseBody == null ? new byte[0] : responseBody.bytes();
     } catch (IOException e) {
       throw new FacturapiException("I/O error when calling Facturapi API", e);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new FacturapiException("Request interrupted", e);
     }
   }
 
   private InputStream requestStream(String method, String path, Object body) {
+    Request request = buildRequest(method, path, null, body, null);
     try {
-      HttpRequest request = buildRequest(method, path, null, body, null);
-      HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-      int statusCode = response.statusCode();
-      if (statusCode < 200 || statusCode >= 300) {
-        byte[] responseBytes;
-        try (InputStream errorStream = response.body()) {
-          responseBytes = errorStream == null ? new byte[0] : errorStream.readAllBytes();
+      Response response = httpClient.newCall(request).execute();
+      if (!response.isSuccessful()) {
+        try {
+          throw buildApiException(readBodyText(response), response.code());
+        } finally {
+          response.close();
         }
-        String bodyText = responseBytes.length == 0 ? "" : new String(responseBytes, StandardCharsets.UTF_8);
-        throw buildApiException(bodyText, statusCode);
       }
-      return response.body();
+
+      ResponseBody responseBody = response.body();
+      if (responseBody == null) {
+        response.close();
+        return new ByteArrayInputStream(new byte[0]);
+      }
+      return new ResponseInputStream(response, responseBody);
     } catch (IOException e) {
       throw new FacturapiException("I/O error when calling Facturapi API", e);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new FacturapiException("Request interrupted", e);
     }
   }
 
@@ -255,6 +261,9 @@ public final class FacturapiHttpClient {
             errorPath = pathNode.asText();
           }
 
+          if (firstDefined(root, "message", "error", "detail") == null) {
+            message = bodyText;
+          }
         }
       } catch (Exception ignored) {
         message = bodyText.isBlank() ? message : bodyText;
@@ -264,41 +273,50 @@ public final class FacturapiHttpClient {
     return new FacturapiException(message, resolvedStatus, errorCode, errorPath);
   }
 
-  private HttpRequest buildRequest(
+  private static String readBodyText(Response response) throws IOException {
+    ResponseBody responseBody = response.body();
+    if (responseBody == null) {
+      return "";
+    }
+    return responseBody.string();
+  }
+
+  private Request buildRequest(
     String method,
     String path,
     Map<String, ?> queryParams,
     Object body,
     MultipartBody multipartBody
-  ) throws IOException {
-    URI uri = URI.create(baseUrl + normalizePath(path) + buildQuery(queryParams));
-    HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-      .uri(uri)
-      .timeout(timeout)
+  ) {
+    String url = baseUrl + normalizePath(path) + buildQuery(queryParams);
+    Request.Builder builder = new Request.Builder()
+      .url(url)
       .header("Authorization", "Bearer " + apiKey)
       .header("Accept", "application/json")
       .header("User-Agent", userAgent);
 
-    HttpRequest.BodyPublisher publisher = HttpRequest.BodyPublishers.noBody();
+    RequestBody requestBody = null;
     if (multipartBody != null) {
-      publisher = multipartBody.getPublisher();
-      requestBuilder.header("Content-Type", multipartBody.getContentType());
+      requestBody = multipartBody.getBody();
     } else if (body != null) {
-      byte[] json = objectMapper.writeValueAsBytes(body);
-      publisher = HttpRequest.BodyPublishers.ofByteArray(json);
-      requestBuilder.header("Content-Type", "application/json");
+      try {
+        byte[] json = objectMapper.writeValueAsBytes(body);
+        requestBody = RequestBody.create(json, JSON_MEDIA_TYPE);
+      } catch (IOException e) {
+        throw new UncheckedIOException("Could not serialize request body", e);
+      }
     }
 
-    requestBuilder.method(method, publisher);
-    return requestBuilder.build();
-  }
-
-  private void validateResponse(HttpResponse<byte[]> response) {
-    int statusCode = response.statusCode();
-    if (statusCode < 200 || statusCode >= 300) {
-      String bodyText = response.body() == null ? "" : new String(response.body(), StandardCharsets.UTF_8);
-      throw buildApiException(bodyText, statusCode);
+    if (requestBody == null) {
+      if ("GET".equals(method) || "HEAD".equals(method)) {
+        builder.method(method, null);
+      } else {
+        builder.method(method, RequestBody.create(new byte[0], null));
+      }
+    } else {
+      builder.method(method, requestBody);
     }
+    return builder.build();
   }
 
   private static String normalizePath(String path) {
@@ -344,5 +362,37 @@ public final class FacturapiHttpClient {
     String encodedKey = URLEncoder.encode(Objects.toString(key), StandardCharsets.UTF_8);
     String encodedValue = URLEncoder.encode(Objects.toString(value), StandardCharsets.UTF_8);
     parts.add(encodedKey + "=" + encodedValue);
+  }
+
+  private static final class ResponseInputStream extends InputStream {
+    private final Response response;
+    private final ResponseBody responseBody;
+    private final InputStream delegate;
+
+    private ResponseInputStream(Response response, ResponseBody responseBody) {
+      this.response = response;
+      this.responseBody = responseBody;
+      this.delegate = responseBody.byteStream();
+    }
+
+    @Override
+    public int read() throws IOException {
+      return delegate.read();
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+      return delegate.read(b, off, len);
+    }
+
+    @Override
+    public void close() throws IOException {
+      try {
+        delegate.close();
+      } finally {
+        responseBody.close();
+        response.close();
+      }
+    }
   }
 }

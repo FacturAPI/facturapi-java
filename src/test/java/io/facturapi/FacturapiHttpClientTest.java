@@ -19,7 +19,7 @@ class FacturapiHttpClientTest {
 
     FacturapiHttpClient client = new FacturapiHttpClient(
       FacturapiConfig.builder("sk_test_123")
-        .httpClient(httpClient)
+        .httpClient(httpClient.client())
         .build()
     );
 
@@ -40,7 +40,7 @@ class FacturapiHttpClientTest {
 
     FacturapiHttpClient client = new FacturapiHttpClient(
       FacturapiConfig.builder("sk_test_123")
-        .httpClient(httpClient)
+        .httpClient(httpClient.client())
         .build()
     );
 
@@ -54,7 +54,7 @@ class FacturapiHttpClientTest {
 
     FacturapiHttpClient client = new FacturapiHttpClient(
       FacturapiConfig.builder("sk_test_123")
-        .httpClient(httpClient)
+        .httpClient(httpClient.client())
         .build()
     );
 

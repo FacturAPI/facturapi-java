@@ -30,7 +30,7 @@ class FacturapiResourcesTest {
 
     Facturapi sdk = new Facturapi(
       FacturapiConfig.builder("sk_test")
-        .httpClient(httpClient)
+        .httpClient(httpClient.client())
         .build()
     );
 
@@ -50,7 +50,7 @@ class FacturapiResourcesTest {
 
     Facturapi sdk = new Facturapi(
       FacturapiConfig.builder("sk_test")
-        .httpClient(httpClient)
+        .httpClient(httpClient.client())
         .build()
     );
 
@@ -69,7 +69,7 @@ class FacturapiResourcesTest {
 
     Facturapi sdk = new Facturapi(
       FacturapiConfig.builder("sk_test")
-        .httpClient(httpClient)
+        .httpClient(httpClient.client())
         .build()
     );
 
@@ -87,7 +87,7 @@ class FacturapiResourcesTest {
 
     Facturapi sdk = new Facturapi(
       FacturapiConfig.builder("sk_test")
-        .httpClient(httpClient)
+        .httpClient(httpClient.client())
         .build()
     );
 
@@ -105,9 +105,10 @@ class FacturapiResourcesTest {
 
   @Test
   void sdkExposesAccessorBasedSurface() {
+    StubHttpClient httpClient = new StubHttpClient();
     Facturapi sdk = new Facturapi(
       FacturapiConfig.builder("sk_test")
-        .httpClient(new StubHttpClient())
+        .httpClient(httpClient.client())
         .build()
     );
 
@@ -130,7 +131,7 @@ class FacturapiResourcesTest {
 
     Facturapi sdk = new Facturapi(
       FacturapiConfig.builder("sk_test")
-        .httpClient(httpClient)
+        .httpClient(httpClient.client())
         .build()
     );
 
@@ -158,7 +159,7 @@ class FacturapiResourcesTest {
 
     Facturapi sdk = new Facturapi(
       FacturapiConfig.builder("sk_test")
-        .httpClient(httpClient)
+        .httpClient(httpClient.client())
         .build()
     );
 

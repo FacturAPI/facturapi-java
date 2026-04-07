@@ -1,18 +1,18 @@
 package io.facturapi.http;
 
-import java.net.http.HttpRequest;
+import okhttp3.RequestBody;
 
 public final class MultipartBody {
-  private final HttpRequest.BodyPublisher publisher;
+  private final RequestBody body;
   private final String contentType;
 
-  public MultipartBody(HttpRequest.BodyPublisher publisher, String contentType) {
-    this.publisher = publisher;
+  public MultipartBody(RequestBody body, String contentType) {
+    this.body = body;
     this.contentType = contentType;
   }
 
-  public HttpRequest.BodyPublisher getPublisher() {
-    return publisher;
+  public RequestBody getBody() {
+    return body;
   }
 
   public String getContentType() {
