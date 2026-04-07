@@ -13,8 +13,8 @@ jobs:
     name: Publish to Maven Central
     runs-on: ubuntu-latest
     env:
-      CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-      CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+      CENTRAL_TOKEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
+      CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     steps:
       - name: Checkout
@@ -27,8 +27,8 @@ jobs:
           java-version: 25
           cache: maven
           server-id: central
-          server-username: CENTRAL_USERNAME
-          server-password: CENTRAL_PASSWORD
+          server-username: CENTRAL_TOKEN_USERNAME
+          server-password: CENTRAL_TOKEN_PASSWORD
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
 
