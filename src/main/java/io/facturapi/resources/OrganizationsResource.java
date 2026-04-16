@@ -202,6 +202,18 @@ public class OrganizationsResource extends BaseResource {
   }
 
   /**
+   * Sets the default invoice series for a document type.
+   *
+   * @param organizationId Organization id.
+   * @param data Default series payload.
+   * @return Updated organization configuration.
+   * @see <a href="https://docs.facturapi.io/api#operation/updateDefaultSeries">API reference</a>
+   */
+  public Organization updateDefaultSeries(String organizationId, Map<String, Object> data) {
+    return put("/organizations/" + organizationId + "/series-group/default-series", data, null, Organization.class);
+  }
+
+  /**
    * Deletes an invoice series.
    */
   public Series deleteSeriesGroup(String organizationId, String seriesName) {
