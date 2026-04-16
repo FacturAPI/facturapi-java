@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,6 +17,8 @@ jobs:
       CENTRAL_TOKEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
       CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      CENTRAL_GROUP_ID: io.facturapi
+      CENTRAL_ARTIFACT_ID: facturapi-java
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,10 +43,16 @@ jobs:
         run: |
           set -euo pipefail
 
+          python3 -m pip install --disable-pip-version-check --quiet semver
+
           python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import base64
+          import os
           import sys
           import urllib.request
+          import urllib.error
           import xml.etree.ElementTree as ET
+          import semver
 
           ns = {"m": "http://maven.apache.org/POM/4.0.0"}
           pom = ET.parse("pom.xml").getroot()
@@ -68,119 +77,271 @@ jobs:
           except Exception:
               latest = "0.0.0"
 
-          def parse_semver(value: str):
-              core = value.split("+", 1)[0]
-              main, _, prerelease = core.partition("-")
-              major, minor, patch = (int(part) for part in main.split(".")[:3])
-              return major, minor, patch, prerelease
+          def to_semver(value: str):
+              try:
+                  return semver.Version.parse(value)
+              except ValueError:
+                  return None
 
-          def is_greater(left: str, right: str) -> bool:
-              left_parts = parse_semver(left)
-              right_parts = parse_semver(right)
-              if left_parts[:3] != right_parts[:3]:
-                  return left_parts[:3] > right_parts[:3]
-              left_pre = left_parts[3]
-              right_pre = right_parts[3]
-              if left_pre == right_pre:
-                  return False
-              if not left_pre:
-                  return True
-              if not right_pre:
-                  return False
-              return left_pre > right_pre
+          current_semver = to_semver(version)
+          latest_semver = to_semver(latest) or semver.Version.parse("0.0.0")
+          if current_semver is None:
+              print(f"current_version={version}")
+              print(f"latest_version={latest}")
+              print("publish=false")
+              print("reason=current version is not valid semver")
+              sys.exit(0)
 
-          def is_greater_or_equal(left: str, right: str) -> bool:
-              left_parts = parse_semver(left)
-              right_parts = parse_semver(right)
-              if left_parts[:3] != right_parts[:3]:
-                  return left_parts[:3] > right_parts[:3]
-              left_pre = left_parts[3]
-              right_pre = right_parts[3]
-              if left_pre == right_pre:
-                  return True
-              if not left_pre:
-                  return True
-              if not right_pre:
-                  return False
-              return left_pre >= right_pre
+          publish = current_semver > latest_semver
+          reason = "current version is newer than published version"
+          if publish:
+              # If a deployment for this exact version is already staged/ongoing in the Portal,
+              # skip a duplicate publish attempt and leave the workflow green.
+              username = os.environ.get("CENTRAL_TOKEN_USERNAME", "")
+              password = os.environ.get("CENTRAL_TOKEN_PASSWORD", "")
+              group_id = os.environ.get("CENTRAL_GROUP_ID", "io.facturapi")
+              artifact_id = os.environ.get("CENTRAL_ARTIFACT_ID", "facturapi-java")
+              if username and password:
+                  token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("utf-8")
+                  rel_path = f"{group_id.replace('.', '/')}/{artifact_id}/{version}/{artifact_id}-{version}.pom"
+                  url = f"https://central.sonatype.com/api/v1/publisher/deployments/download/{rel_path}"
+                  req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"}, method="HEAD")
+                  try:
+                      with urllib.request.urlopen(req, timeout=20) as response:
+                          if response.status == 200:
+                              publish = False
+                              reason = "version already staged or publishing in Central Portal"
+                  except urllib.error.HTTPError as err:
+                      if err.code != 404:
+                          print(f"portal_stage_check_status={err.code}")
+                  except Exception:
+                      pass
 
-          publish = is_greater(version, latest)
-          release = is_greater_or_equal(version, latest)
           print(f"current_version={version}")
-          print(f"release_tag=v{version}")
           print(f"latest_version={latest}")
           print(f"publish={'true' if publish else 'false'}")
-          print(f"release={'true' if release else 'false'}")
-          print(f"reason={'current version is newer than published version' if publish else 'published version is current or newer'}")
-          PY
-
-      - name: Extract release notes
-        if: steps.gate.outputs.release == 'true'
-        id: notes
-        env:
-          RELEASE_VERSION: ${{ steps.gate.outputs.current_version }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          python3 <<'PY'
-          import os
-          from pathlib import Path
-
-          version = os.environ["RELEASE_VERSION"]
-          changelog = Path("CHANGELOG.md")
-          if not changelog.exists():
-              raise SystemExit("CHANGELOG.md is required to publish a release.")
-
-          section_header = f"## [{version}]"
-          lines = changelog.read_text(encoding="utf-8").splitlines()
-          section = []
-          in_section = False
-
-          for line in lines:
-              if line.startswith("## ["):
-                  if in_section:
-                      break
-                  if line.startswith(section_header):
-                      in_section = True
-              if in_section:
-                  section.append(line)
-
-          if not section:
-              raise SystemExit(f"Could not find changelog entry for version {version}.")
-
-          notes_path = Path("release-notes.md")
-          notes_path.write_text("\n".join(section).strip() + "\n", encoding="utf-8")
-
-          output_path = Path(os.environ["GITHUB_OUTPUT"])
-          with output_path.open("a", encoding="utf-8") as output:
-              output.write(f"notes_file={notes_path}\n")
+          if publish:
+              reason = "current version is newer than published version"
+          elif reason == "current version is newer than published version":
+              reason = "published version is current or newer"
+          print(f"reason={reason}")
           PY
 
       - name: Publish
+        id: publish_step
         if: steps.gate.outputs.publish == 'true'
         run: mvn -B -ntp -DskipTests -DpublishRelease=true deploy
 
-      - name: Create or update GitHub Release
-        if: steps.gate.outputs.release == 'true'
+      - name: Ensure release tag is in sync
+        if: steps.gate.outputs.publish == 'true' && steps.publish_step.outcome == 'success'
         env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ steps.gate.outputs.release_tag }}
-          RELEASE_NOTES_FILE: ${{ steps.notes.outputs.notes_file }}
+          VERSION: ${{ steps.gate.outputs.current_version }}
         shell: bash
         run: |
           set -euo pipefail
+          tag="v${VERSION}"
+          current_sha="$(git rev-parse HEAD)"
 
-          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release edit "$RELEASE_TAG" \
-              --title "$RELEASE_TAG" \
-              --notes-file "$RELEASE_NOTES_FILE"
-          else
-            gh release create "$RELEASE_TAG" \
-              --target "$GITHUB_SHA" \
-              --title "$RELEASE_TAG" \
-              --notes-file "$RELEASE_NOTES_FILE"
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            tag_sha="$(git rev-list -n 1 "$tag")"
+            if [ "$tag_sha" != "$current_sha" ]; then
+              echo "::error::Tag $tag already exists at $tag_sha, expected $current_sha"
+              exit 1
+            fi
+            echo "Tag $tag already in sync with $current_sha"
+            exit 0
           fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "Release $tag"
+          git push origin "$tag"
+          echo "Created and pushed tag $tag"
+
+      - name: Create or update GitHub release notes
+        if: steps.gate.outputs.publish == 'true' && steps.publish_step.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.gate.outputs.current_version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="v${VERSION}"
+          notes_file="/tmp/release_notes.md"
+
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          header = f"## [{version}]"
+          changelog = Path("CHANGELOG.md")
+          output = Path("/tmp/release_notes.md")
+
+          if not changelog.exists():
+              output.write_text(f"Release {version}", encoding="utf-8")
+              raise SystemExit(0)
+
+          lines = changelog.read_text(encoding="utf-8").splitlines()
+          in_target = False
+          captured = []
+          for line in lines:
+              if line.startswith(header):
+                  in_target = True
+                  continue
+              if in_target and line.startswith("## ["):
+                  break
+              if in_target:
+                  captured.append(line)
+
+          notes = "\n".join(captured).strip()
+          if not notes:
+              notes = f"Release {version}"
+          output.write_text(notes + "\n", encoding="utf-8")
+          PY
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" --title "$tag" --notes-file "$notes_file"
+            echo "Updated release $tag"
+          else
+            gh release create "$tag" --title "$tag" --notes-file "$notes_file"
+            echo "Created release $tag"
+          fi
+
+      - name: Notify Slack (success)
+        if: steps.gate.outputs.publish == 'true' && steps.publish_step.outcome == 'success'
+        env:
+          SLACK_DEPLOY_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOY_WEBHOOK_URL }}
+          VERSION: ${{ steps.gate.outputs.current_version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${SLACK_DEPLOY_WEBHOOK_URL:-}" ]; then
+            echo "SLACK_DEPLOY_WEBHOOK_URL not set; skipping Slack notification"
+            exit 0
+          fi
+
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          ref_name = os.environ["GITHUB_REF_NAME"]
+          sha = os.environ["GITHUB_SHA"]
+          actor = os.environ["GITHUB_ACTOR"]
+          server_url = os.environ["GITHUB_SERVER_URL"]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          run_id = os.environ["GITHUB_RUN_ID"]
+
+          changelog = Path("CHANGELOG.md")
+          latest_changes = "See CHANGELOG for details."
+          section_header = f"## [{version}]"
+          if changelog.exists():
+              lines = changelog.read_text(encoding="utf-8").splitlines()
+              in_target = False
+              bullets = []
+              for line in lines:
+                  if line.startswith(section_header):
+                      in_target = True
+                      continue
+                  if in_target and line.startswith("## ["):
+                      break
+                  if in_target and line.startswith("- "):
+                      bullets.append(line[2:].strip())
+              if bullets:
+                  latest_changes = "\n".join(f"• {b}" for b in bullets[:5])
+
+          payload = {
+              "text": f"🚀 Facturapi Java SDK {version} validated and submitted",
+              "blocks": [
+                  {
+                      "type": "header",
+                      "text": {
+                          "type": "plain_text",
+                          "text": f"🚀 Java SDK {version} validated and submitted to Maven Central"
+                      }
+                  },
+                  {
+                      "type": "section",
+                      "fields": [
+                          {"type": "mrkdwn", "text": f"*Package:* `io.facturapi:facturapi-java:{version}`"},
+                          {"type": "mrkdwn", "text": f"*Branch:* `{ref_name}`"},
+                          {"type": "mrkdwn", "text": f"*Commit:* `{sha}`"},
+                          {"type": "mrkdwn", "text": f"*Actor:* `{actor}`"}
+                      ]
+                  },
+                  {
+                      "type": "section",
+                      "text": {
+                          "type": "mrkdwn",
+                          "text": (
+                              "*Useful links*\n"
+                              f"• Maven Central: <https://central.sonatype.com/artifact/io.facturapi/facturapi-java/{version}|View artifact>\n"
+                              f"• Central deployment status: <https://central.sonatype.com/publishing/deployments|Check progress>\n"
+                              f"• Workflow run: <{server_url}/{repo}/actions/runs/{run_id}|Open run>\n"
+                              f"• Changelog: <{server_url}/{repo}/blob/{sha}/CHANGELOG.md|Read changes>"
+                          )
+                      }
+                  },
+                  {
+                      "type": "section",
+                      "text": {
+                          "type": "mrkdwn",
+                          "text": f"*Latest changes*\n{latest_changes}"
+                      }
+                  }
+              ]
+          }
+
+          Path("/tmp/slack_payload.json").write_text(json.dumps(payload), encoding="utf-8")
+          PY
+
+          curl -sS -X POST -H "Content-type: application/json" --data "@/tmp/slack_payload.json" "$SLACK_DEPLOY_WEBHOOK_URL" || true
+
+      - name: Notify Slack (failure)
+        if: steps.gate.outputs.publish == 'true' && steps.publish_step.outcome == 'failure'
+        env:
+          SLACK_DEPLOY_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOY_WEBHOOK_URL }}
+          VERSION: ${{ steps.gate.outputs.current_version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${SLACK_DEPLOY_WEBHOOK_URL:-}" ]; then
+            echo "SLACK_DEPLOY_WEBHOOK_URL not set; skipping Slack notification"
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          server_url = os.environ["GITHUB_SERVER_URL"]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          run_id = os.environ["GITHUB_RUN_ID"]
+          sha = os.environ["GITHUB_SHA"]
+
+          payload = {
+              "text": f"❌ Facturapi Java SDK {version} publish failed",
+              "blocks": [
+                  {
+                      "type": "section",
+                      "text": {
+                          "type": "mrkdwn",
+                          "text": (
+                              f"❌ *Java SDK {version} publish failed*\n"
+                              f"• Workflow run: <{server_url}/{repo}/actions/runs/{run_id}|Open run>\n"
+                              f"• Commit: `{sha}`"
+                          )
+                      }
+                  }
+              ]
+          }
+
+          Path("/tmp/slack_payload_failure.json").write_text(json.dumps(payload), encoding="utf-8")
+          PY
+          curl -sS -X POST -H "Content-type: application/json" --data "@/tmp/slack_payload_failure.json" "$SLACK_DEPLOY_WEBHOOK_URL" || true
 
       - name: Skip publish
         if: steps.gate.outputs.publish != 'true'
