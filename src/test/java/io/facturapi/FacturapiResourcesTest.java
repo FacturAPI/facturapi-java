@@ -3,6 +3,7 @@ package io.facturapi;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.facturapi.enums.CancellationStatus;
 import io.facturapi.enums.InvoiceStatus;
@@ -141,6 +142,33 @@ class FacturapiResourcesTest {
     assertNotNull(response.get(0).getId());
     var request = httpClient.requests().get(0);
     assertEquals("/v2/organizations/org_1/apikeys/live", request.uri().getPath());
+  }
+
+  @Test
+  void organizationDefaultSeriesCanBeUpdated() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"org_1\"}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var response = sdk.organizations().updateDefaultSeries(
+      "org_1",
+      Map.of(
+        "type", "I",
+        "series", "A"
+      )
+    );
+
+    assertEquals("org_1", response.getId());
+    var request = httpClient.requests().get(0);
+    assertEquals("PUT", request.method());
+    assertEquals("/v2/organizations/org_1/series-group/default-series", request.uri().getPath());
+    assertTrue(request.bodyUtf8().contains("\"type\":\"I\""));
+    assertTrue(request.bodyUtf8().contains("\"series\":\"A\""));
   }
 
   @Test

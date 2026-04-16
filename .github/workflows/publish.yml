@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   publish:
@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -87,16 +89,98 @@ jobs:
                   return False
               return left_pre > right_pre
 
+          def is_greater_or_equal(left: str, right: str) -> bool:
+              left_parts = parse_semver(left)
+              right_parts = parse_semver(right)
+              if left_parts[:3] != right_parts[:3]:
+                  return left_parts[:3] > right_parts[:3]
+              left_pre = left_parts[3]
+              right_pre = right_parts[3]
+              if left_pre == right_pre:
+                  return True
+              if not left_pre:
+                  return True
+              if not right_pre:
+                  return False
+              return left_pre >= right_pre
+
           publish = is_greater(version, latest)
+          release = is_greater_or_equal(version, latest)
           print(f"current_version={version}")
+          print(f"release_tag=v{version}")
           print(f"latest_version={latest}")
           print(f"publish={'true' if publish else 'false'}")
+          print(f"release={'true' if release else 'false'}")
           print(f"reason={'current version is newer than published version' if publish else 'published version is current or newer'}")
+          PY
+
+      - name: Extract release notes
+        if: steps.gate.outputs.release == 'true'
+        id: notes
+        env:
+          RELEASE_VERSION: ${{ steps.gate.outputs.current_version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 <<'PY'
+          import os
+          from pathlib import Path
+
+          version = os.environ["RELEASE_VERSION"]
+          changelog = Path("CHANGELOG.md")
+          if not changelog.exists():
+              raise SystemExit("CHANGELOG.md is required to publish a release.")
+
+          section_header = f"## [{version}]"
+          lines = changelog.read_text(encoding="utf-8").splitlines()
+          section = []
+          in_section = False
+
+          for line in lines:
+              if line.startswith("## ["):
+                  if in_section:
+                      break
+                  if line.startswith(section_header):
+                      in_section = True
+              if in_section:
+                  section.append(line)
+
+          if not section:
+              raise SystemExit(f"Could not find changelog entry for version {version}.")
+
+          notes_path = Path("release-notes.md")
+          notes_path.write_text("\n".join(section).strip() + "\n", encoding="utf-8")
+
+          output_path = Path(os.environ["GITHUB_OUTPUT"])
+          with output_path.open("a", encoding="utf-8") as output:
+              output.write(f"notes_file={notes_path}\n")
           PY
 
       - name: Publish
         if: steps.gate.outputs.publish == 'true'
         run: mvn -B -ntp -DskipTests -DpublishRelease=true deploy
+
+      - name: Create or update GitHub Release
+        if: steps.gate.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.gate.outputs.release_tag }}
+          RELEASE_NOTES_FILE: ${{ steps.notes.outputs.notes_file }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" \
+              --title "$RELEASE_TAG" \
+              --notes-file "$RELEASE_NOTES_FILE"
+          else
+            gh release create "$RELEASE_TAG" \
+              --target "$GITHUB_SHA" \
+              --title "$RELEASE_TAG" \
+              --notes-file "$RELEASE_NOTES_FILE"
+          fi
 
       - name: Skip publish
         if: steps.gate.outputs.publish != 'true'
