@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-04-23
+
+### Added
+
+- Add `ComplementsCatalogsConstants` with Carta Porte/Comercio Exterior catalog enums and Spanish description maps for customs regimes, transport keys, permits, COFEPRIS sectors, pharmaceutical forms, special conditions, material types, customs document types, transport parts/figures, ISTMO registry, loading keys, maritime configs, rail traffic/container/car/service types, traslado motives, incoterms, and customs units.
+
 ## [1.1.0] - 2026-04-16
 
 ### Added
