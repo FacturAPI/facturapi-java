@@ -5,7 +5,7 @@
 
   <groupId>io.facturapi</groupId>
   <artifactId>facturapi-java</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <name>facturapi-java</name>
   <description>Official Java SDK for Facturapi</description>
   <url>https://github.com/facturapi/facturapi-java</url>
