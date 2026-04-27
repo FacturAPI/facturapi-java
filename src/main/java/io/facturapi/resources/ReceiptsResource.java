@@ -76,6 +76,27 @@ public class ReceiptsResource extends BaseResource {
   }
 
   /**
+   * Creates a to-invoice from a list of receipt keys.
+   * Supports both invoice response and dry-run summary response.
+   *
+   * @param data to-invoice payload.
+   * @return Invoice/summary response as a generic map.
+   */
+  public Map<String, Object> toInvoice(Map<String, Object> data) {
+    return post("/receipts/to-invoice", data, null, new TypeReference<Map<String, Object>>() {});
+  }
+
+  /**
+   * Generates a PDF preview for a to-invoice payload.
+   *
+   * @param data To-invoice preview payload.
+   * @return PDF bytes.
+   */
+  public byte[] previewToInvoicePdf(Map<String, Object> data) {
+    return client.postBytes("/receipts/to-invoice/preview/pdf", data);
+  }
+
+  /**
    * Cancels a receipt.
    *
    * @param id Receipt id.

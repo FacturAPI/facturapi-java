@@ -45,6 +45,55 @@ class FacturapiResourcesTest {
   }
 
   @Test
+  void receiptsToInvoiceUsesExpectedPath() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"inv_multi_1\"}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var response = sdk.receipts().toInvoice(
+      Map.of(
+        "keys", java.util.List.of("rec_1", "rec_2"),
+        "use", "G03"
+      )
+    );
+
+    assertEquals("inv_multi_1", response.get("id"));
+    var request = httpClient.requests().get(0);
+    assertEquals("POST", request.method());
+    assertEquals("/v2/receipts/to-invoice", request.uri().getPath());
+    assertTrue(request.bodyUtf8().contains("\"keys\":[\"rec_1\",\"rec_2\"]"));
+  }
+
+  @Test
+  void receiptsPreviewToInvoicePdfReturnsBytes() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueBinary(200, "PDF-TO-INVOICE".getBytes(StandardCharsets.UTF_8), "application/pdf");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var pdfBytes = sdk.receipts().previewToInvoicePdf(
+      Map.of(
+        "keys", java.util.List.of("rec_1"),
+        "use", "G03"
+      )
+    );
+
+    assertEquals("PDF-TO-INVOICE", new String(pdfBytes, StandardCharsets.UTF_8));
+    var request = httpClient.requests().get(0);
+    assertEquals("POST", request.method());
+    assertEquals("/v2/receipts/to-invoice/preview/pdf", request.uri().getPath());
+  }
+
+  @Test
   void invoicePdfCanBeStreamed() throws Exception {
     StubHttpClient httpClient = new StubHttpClient();
     httpClient.enqueueBinary(200, "PDF-CONTENT".getBytes(), "application/pdf");
