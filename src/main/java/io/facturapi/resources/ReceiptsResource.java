@@ -76,6 +76,27 @@ public class ReceiptsResource extends BaseResource {
   }
 
   /**
+   * Creates a to-invoice from a list of receipt keys.
+   * Returns the created invoice.
+   *
+   * @param data to-invoice payload.
+   * @return Created invoice.
+   */
+  public Invoice toInvoice(Map<String, Object> data) {
+    return post("/receipts/to-invoice", data, null, Invoice.class);
+  }
+
+  /**
+   * Generates a PDF preview for a to-invoice payload.
+   *
+   * @param data To-invoice preview payload.
+   * @return PDF bytes.
+   */
+  public byte[] previewToInvoicePdf(Map<String, Object> data) {
+    return client.postBytes("/receipts/to-invoice/preview", data);
+  }
+
+  /**
    * Cancels a receipt.
    *
    * @param id Receipt id.
