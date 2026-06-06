@@ -50,7 +50,11 @@ class FacturapiHttpClientTest {
   @Test
   void throwsFacturapiExceptionWithApiMessage() {
     StubHttpClient httpClient = new StubHttpClient();
-    httpClient.enqueueJson(400, "{\"message\":\"Invalid customer\",\"status\":\"400\",\"code\":\"validation_error\",\"path\":\"customer.tax_id\"}");
+    httpClient.enqueueJson(
+      400,
+      "{\"message\":\"Invalid customer\",\"status\":\"400\",\"code\":\"validation_error\",\"path\":\"customer.tax_id\",\"location\":\"body\",\"errors\":[{\"code\":\"required\",\"message\":\"tax id is required\",\"path\":\"customer.tax_id\",\"location\":\"body\"}]}",
+      Map.of("Retry-After", java.util.List.of("3"), "x-facturapi-log-id", java.util.List.of("log_123"))
+    );
 
     FacturapiHttpClient client = new FacturapiHttpClient(
       FacturapiConfig.builder("sk_test_123")
@@ -67,5 +71,10 @@ class FacturapiHttpClientTest {
     assertTrue(ex.getMessage().contains("Invalid customer"));
     assertEquals("validation_error", ex.getErrorCode());
     assertEquals("customer.tax_id", ex.getErrorPath());
+    assertEquals("body", ex.getErrorLocation());
+    assertEquals("log_123", ex.getLogId());
+    assertEquals("required", ex.getErrors().get(0).get("code").asText());
+    assertEquals("3", ex.getHeaders().get("Retry-After").get(0));
+    assertEquals("log_123", ex.getHeaders().get("x-facturapi-log-id").get(0));
   }
 }
