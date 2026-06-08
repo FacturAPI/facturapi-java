@@ -105,11 +105,17 @@ final class StubHttpClient {
   }
 
   void enqueueJson(int statusCode, String json) {
+    enqueueJson(statusCode, json, Map.of());
+  }
+
+  void enqueueJson(int statusCode, String json, Map<String, List<String>> extraHeaders) {
+    Map<String, List<String>> headers = new java.util.HashMap<>(extraHeaders);
+    headers.put("Content-Type", List.of("application/json"));
     queue.add(
       new QueuedResponse(
         statusCode,
         json.getBytes(StandardCharsets.UTF_8),
-        Map.of("Content-Type", List.of("application/json"))
+        headers
       )
     );
   }

@@ -104,7 +104,7 @@ public final class FacturapiHttpClient {
     Request request = buildRequest(method, path, queryParams, body, multipartBody);
     try (Response response = httpClient.newCall(request).execute()) {
       if (!response.isSuccessful()) {
-        throw buildApiException(readBodyText(response), response.code());
+        throw buildApiException(readBodyText(response), response);
       }
 
       ResponseBody responseBody = response.body();
@@ -131,7 +131,7 @@ public final class FacturapiHttpClient {
     Request request = buildRequest(method, path, null, body, null);
     try (Response response = httpClient.newCall(request).execute()) {
       if (!response.isSuccessful()) {
-        throw buildApiException(readBodyText(response), response.code());
+        throw buildApiException(readBodyText(response), response);
       }
       ResponseBody responseBody = response.body();
       return responseBody == null ? new byte[0] : responseBody.bytes();
@@ -146,7 +146,7 @@ public final class FacturapiHttpClient {
       Response response = httpClient.newCall(request).execute();
       if (!response.isSuccessful()) {
         try {
-          throw buildApiException(readBodyText(response), response.code());
+          throw buildApiException(readBodyText(response), response);
         } finally {
           response.close();
         }
@@ -207,10 +207,13 @@ public final class FacturapiHttpClient {
     return null;
   }
 
-  private FacturapiException buildApiException(String bodyText, int statusCode) {
+  private FacturapiException buildApiException(String bodyText, Response response) {
+    int statusCode = response.code();
     int resolvedStatus = statusCode;
     Object errorCode = null;
     String errorPath = null;
+    String errorLocation = null;
+    JsonNode errors = null;
     String message = "Request failed with status " + statusCode;
 
     if (bodyText != null && !bodyText.isBlank()) {
@@ -261,6 +264,16 @@ public final class FacturapiHttpClient {
             errorPath = pathNode.asText();
           }
 
+          JsonNode locationNode = firstDefined(root, "location");
+          if (locationNode != null && locationNode.isTextual()) {
+            errorLocation = locationNode.asText();
+          }
+
+          JsonNode errorsNode = firstDefined(root, "errors");
+          if (errorsNode != null && errorsNode.isArray()) {
+            errors = errorsNode;
+          }
+
           if (firstDefined(root, "message", "error", "detail") == null) {
             message = bodyText;
           }
@@ -270,7 +283,16 @@ public final class FacturapiHttpClient {
       }
     }
 
-    return new FacturapiException(message, resolvedStatus, errorCode, errorPath);
+    return new FacturapiException(
+      message,
+      resolvedStatus,
+      errorCode,
+      errorPath,
+      errorLocation,
+      errors,
+      response.header("x-facturapi-log-id"),
+      response.headers().toMultimap()
+    );
   }
 
   private static String readBodyText(Response response) throws IOException {
