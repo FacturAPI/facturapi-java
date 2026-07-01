@@ -19,7 +19,7 @@ public class RetentionsResource extends BaseResource {
   }
 
   /**
-   * Creates a new valid retention (CFDI).
+   * Creates a new retention (CFDI).
    *
    * @param data Retention payload.
    * @return Created retention.
@@ -61,6 +61,51 @@ public class RetentionsResource extends BaseResource {
    */
   public Retention cancel(String id, Map<String, ?> params) {
     return delete("/retentions/" + id, params, Retention.class);
+  }
+
+  /**
+   * Cancels a retention, or deletes it directly when it is a draft.
+   *
+   * @param id Retention id.
+   * @return Canceled or deleted retention.
+   * @see <a href="https://docs.facturapi.io/api#operation/cancelRetention">API reference</a>
+   */
+  public Retention cancel(String id) {
+    return delete("/retentions/" + id, null, Retention.class);
+  }
+
+  /**
+   * Updates a draft retention.
+   *
+   * @param id Retention id.
+   * @param data Retention updates.
+   * @return Updated draft retention.
+   * @see <a href="https://docs.facturapi.io/api#operation/updateDraftRetention">API reference</a>
+   */
+  public Retention updateDraft(String id, Map<String, Object> data) {
+    return put("/retentions/" + id, data, null, Retention.class);
+  }
+
+  /**
+   * Creates a draft copy from an existing retention.
+   *
+   * @param id Retention id.
+   * @return Draft retention.
+   * @see <a href="https://docs.facturapi.io/api#operation/copyToDraftRetention">API reference</a>
+   */
+  public Retention copyToDraft(String id) {
+    return post("/retentions/" + id + "/copy", null, null, Retention.class);
+  }
+
+  /**
+   * Stamps an existing draft retention.
+   *
+   * @param id Retention id.
+   * @return Stamped retention.
+   * @see <a href="https://docs.facturapi.io/api#operation/stampDraftRetention">API reference</a>
+   */
+  public Retention stampDraft(String id) {
+    return post("/retentions/" + id + "/stamp", null, null, Retention.class);
   }
 
   /**
