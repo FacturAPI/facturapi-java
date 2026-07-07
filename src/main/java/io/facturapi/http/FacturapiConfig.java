@@ -114,6 +114,7 @@ public final class FacturapiConfig {
         .registerModule(new JavaTimeModule())
         .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
       this.baseUrl = resolvedBaseUrl;
