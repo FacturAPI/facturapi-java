@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.facturapi.constants.ApiErrorCodes;
 import io.facturapi.http.FacturapiConfig;
 import io.facturapi.http.FacturapiHttpClient;
 import io.facturapi.models.GenericResponse;
@@ -52,7 +53,7 @@ class FacturapiHttpClientTest {
     StubHttpClient httpClient = new StubHttpClient();
     httpClient.enqueueJson(
       400,
-      "{\"message\":\"Invalid customer\",\"status\":\"400\",\"code\":\"validation_error\",\"path\":\"customer.tax_id\",\"location\":\"body\",\"errors\":[{\"code\":\"required\",\"message\":\"tax id is required\",\"path\":\"customer.tax_id\",\"location\":\"body\"}]}",
+      "{\"message\":\"Invalid customer\",\"status\":\"400\",\"code\":\"invalid_request\",\"path\":\"customer.tax_id\",\"location\":\"body\",\"errors\":[{\"code\":\"required\",\"message\":\"tax id is required\",\"path\":\"customer.tax_id\",\"location\":\"body\"}]}",
       Map.of("Retry-After", java.util.List.of("3"), "x-facturapi-log-id", java.util.List.of("log_123"))
     );
 
@@ -69,7 +70,8 @@ class FacturapiHttpClientTest {
 
     assertEquals(400, ex.getStatusCode());
     assertTrue(ex.getMessage().contains("Invalid customer"));
-    assertEquals("validation_error", ex.getErrorCode());
+    assertEquals(ApiErrorCodes.RequestErrorCode.INVALID_REQUEST, ex.getErrorCode());
+    assertEquals(ApiErrorCodes.RequestErrorCode.INVALID_REQUEST, ex.getApiErrorCode());
     assertEquals("customer.tax_id", ex.getErrorPath());
     assertEquals("body", ex.getErrorLocation());
     assertEquals("log_123", ex.getLogId());

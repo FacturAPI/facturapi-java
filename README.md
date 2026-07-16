@@ -29,14 +29,14 @@ Maven:
 <dependency>
   <groupId>io.facturapi</groupId>
   <artifactId>facturapi-java</artifactId>
-  <version>1.1.0</version>
+  <version>1.4.0</version>
 </dependency>
 ```
 
 Gradle:
 
 ```gradle
-implementation("io.facturapi:facturapi-java:1.1.0")
+implementation("io.facturapi:facturapi-java:1.4.0")
 ```
 
 ## Quickstart
@@ -84,13 +84,16 @@ var updated = facturapi.organizations().uploadCertificate(
 
 ```java
 import io.facturapi.FacturapiException;
+import io.facturapi.constants.ApiErrorCodes;
 
 try {
   facturapi.customers().retrieve("cus_123");
 } catch (FacturapiException e) {
   System.out.println(e.getMessage());
   System.out.println(e.getStatusCode());
-  System.out.println(e.getErrorCode());
+  if (ApiErrorCodes.RequestErrorCode.RATE_LIMIT_EXCEEDED.equals(e.getApiErrorCode())) {
+    System.out.println(e.getHeaders().get("retry-after"));
+  }
   System.out.println(e.getErrorPath());
 }
 ```

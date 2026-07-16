@@ -61,6 +61,15 @@ public class FacturapiException extends RuntimeException {
     return errorCode;
   }
 
+  /**
+   * Returns the documented V2 API root error code when the response contains one.
+   *
+   * <p>{@link #getErrorCode()} remains available for compatibility with older API responses.</p>
+   */
+  public String getApiErrorCode() {
+    return errorCode instanceof String ? (String) errorCode : null;
+  }
+
   public String getErrorPath() {
     return errorPath;
   }
