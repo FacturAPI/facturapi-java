@@ -210,7 +210,7 @@ public final class FacturapiHttpClient {
   private FacturapiException buildApiException(String bodyText, Response response) {
     int statusCode = response.code();
     int resolvedStatus = statusCode;
-    Object errorCode = null;
+    String errorCode = null;
     String errorPath = null;
     String errorLocation = null;
     JsonNode errors = null;
@@ -245,18 +245,8 @@ public final class FacturapiHttpClient {
           }
 
           JsonNode codeNode = firstDefined(root, "code");
-          if (codeNode != null && !codeNode.isNull()) {
-            if (codeNode.isTextual()) {
-              errorCode = codeNode.asText();
-            } else if (codeNode.isIntegralNumber()) {
-              errorCode = codeNode.intValue();
-            } else if (codeNode.isNumber()) {
-              errorCode = codeNode.numberValue();
-            } else if (codeNode.isBoolean()) {
-              errorCode = codeNode.asBoolean();
-            } else {
-              errorCode = codeNode.toString();
-            }
+          if (codeNode != null && codeNode.isTextual()) {
+            errorCode = codeNode.asText();
           }
 
           JsonNode pathNode = firstDefined(root, "path");

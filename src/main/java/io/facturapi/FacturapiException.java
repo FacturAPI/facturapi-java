@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class FacturapiException extends RuntimeException {
   private final int statusCode;
-  private final Object errorCode;
+  private final String errorCode;
   private final String errorPath;
   private final String errorLocation;
   private final JsonNode errors;
@@ -29,14 +29,14 @@ public class FacturapiException extends RuntimeException {
     this.headers = Collections.emptyMap();
   }
 
-  public FacturapiException(String message, int statusCode, Object errorCode, String errorPath) {
+  public FacturapiException(String message, int statusCode, String errorCode, String errorPath) {
     this(message, statusCode, errorCode, errorPath, null, null, null, Collections.emptyMap());
   }
 
   public FacturapiException(
     String message,
     int statusCode,
-    Object errorCode,
+    String errorCode,
     String errorPath,
     String errorLocation,
     JsonNode errors,
@@ -57,17 +57,8 @@ public class FacturapiException extends RuntimeException {
     return statusCode;
   }
 
-  public Object getErrorCode() {
+  public String getErrorCode() {
     return errorCode;
-  }
-
-  /**
-   * Returns the documented V2 API root error code when the response contains one.
-   *
-   * <p>{@link #getErrorCode()} remains available for compatibility with older API responses.</p>
-   */
-  public String getApiErrorCode() {
-    return errorCode instanceof String ? (String) errorCode : null;
   }
 
   public String getErrorPath() {

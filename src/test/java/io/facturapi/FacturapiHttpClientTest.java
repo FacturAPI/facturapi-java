@@ -2,6 +2,7 @@ package io.facturapi;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -71,12 +72,30 @@ class FacturapiHttpClientTest {
     assertEquals(400, ex.getStatusCode());
     assertTrue(ex.getMessage().contains("Invalid customer"));
     assertEquals(ApiErrorCodes.RequestErrorCode.INVALID_REQUEST, ex.getErrorCode());
-    assertEquals(ApiErrorCodes.RequestErrorCode.INVALID_REQUEST, ex.getApiErrorCode());
     assertEquals("customer.tax_id", ex.getErrorPath());
     assertEquals("body", ex.getErrorLocation());
     assertEquals("log_123", ex.getLogId());
     assertEquals("required", ex.getErrors().get(0).get("code").asText());
     assertEquals("3", ex.getHeaders().get("Retry-After").get(0));
     assertEquals("log_123", ex.getHeaders().get("x-facturapi-log-id").get(0));
+  }
+
+  @Test
+  void ignoresNonStringApiErrorCodes() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(400, "{\"message\":\"Invalid customer\",\"code\":400}");
+
+    FacturapiHttpClient client = new FacturapiHttpClient(
+      FacturapiConfig.builder("sk_test_123")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    FacturapiException ex = assertThrows(
+      FacturapiException.class,
+      () -> client.get("/customers/cus_1", null, GenericResponse.class)
+    );
+
+    assertNull(ex.getErrorCode());
   }
 }

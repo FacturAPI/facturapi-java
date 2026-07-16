@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add `ApiErrorCodes`, grouped constants for documented API root codes and Facturapi-owned validation detail codes.
-- Add `FacturapiException.getApiErrorCode()` for the string V2 root error code while preserving `getErrorCode()` compatibility.
+- Fix `FacturapiException.getErrorCode()` to return only documented string API root codes.
 
 ## [1.3.0] - 2026-06-07
 

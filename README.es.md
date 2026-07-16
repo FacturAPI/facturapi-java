@@ -91,7 +91,7 @@ try {
 } catch (FacturapiException e) {
   System.out.println(e.getMessage());
   System.out.println(e.getStatusCode());
-  if (ApiErrorCodes.RequestErrorCode.RATE_LIMIT_EXCEEDED.equals(e.getApiErrorCode())) {
+  if (ApiErrorCodes.RequestErrorCode.RATE_LIMIT_EXCEEDED.equals(e.getErrorCode())) {
     System.out.println(e.getHeaders().get("retry-after"));
   }
   System.out.println(e.getErrorPath());
