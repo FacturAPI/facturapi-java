@@ -245,8 +245,8 @@ public final class FacturapiHttpClient {
           }
 
           JsonNode codeNode = firstDefined(root, "code");
-          if (codeNode != null && !codeNode.isNull()) {
-            errorCode = codeNode.isValueNode() ? codeNode.asText() : codeNode.toString();
+          if (codeNode != null && (codeNode.isTextual() || codeNode.isNumber())) {
+            errorCode = codeNode.asText();
           }
 
           JsonNode pathNode = firstDefined(root, "path");
