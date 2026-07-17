@@ -77,4 +77,23 @@ class FacturapiHttpClientTest {
     assertEquals("3", ex.getHeaders().get("Retry-After").get(0));
     assertEquals("log_123", ex.getHeaders().get("x-facturapi-log-id").get(0));
   }
+
+  @Test
+  void convertsNumericApiErrorCodesToStrings() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(400, "{\"message\":\"Invalid customer\",\"code\":400}");
+
+    FacturapiHttpClient client = new FacturapiHttpClient(
+      FacturapiConfig.builder("sk_test_123")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    FacturapiException ex = assertThrows(
+      FacturapiException.class,
+      () -> client.get("/customers/cus_1", null, GenericResponse.class)
+    );
+
+    assertEquals("400", ex.getErrorCode());
+  }
 }
