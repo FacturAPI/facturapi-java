@@ -16,10 +16,12 @@ import io.facturapi.enums.TaxType;
 import io.facturapi.enums.Taxability;
 import io.facturapi.http.FacturapiConfig;
 import io.facturapi.models.Customer;
+import io.facturapi.models.InvoiceItem;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -505,5 +507,19 @@ class FacturapiResourcesTest {
     var tax = mapper.readValue("{\"type\":\"IEPS\",\"factor\":\"Exento\"}", io.facturapi.models.Tax.class);
     assertEquals(TaxType.IEPS, tax.getType());
     assertEquals(TaxFactor.EXENTO, tax.getFactor());
+  }
+
+  @Test
+  void objectMapperDeserializesPropertyTaxAccountsAsArrays() throws Exception {
+    var mapper = FacturapiConfig.builder("sk_test").build().getObjectMapper();
+
+    var empty = mapper.readValue("{\"property_tax_account\":[]}", InvoiceItem.class);
+    var accounts = mapper.readValue(
+      "{\"property_tax_account\":[\"0102030405\"]}",
+      InvoiceItem.class
+    );
+
+    assertEquals(List.of(), empty.getPropertyTaxAccounts());
+    assertEquals(List.of("0102030405"), accounts.getPropertyTaxAccounts());
   }
 }

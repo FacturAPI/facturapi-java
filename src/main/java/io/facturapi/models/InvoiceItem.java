@@ -14,7 +14,8 @@ public class InvoiceItem {
   private InvoiceItemThirdParty thirdParty;
   private String complement;
   private List<InvoiceItemPart> parts = new ArrayList<>();
-  private String propertyTaxAccount;
+  @JsonProperty("property_tax_account")
+  private List<String> propertyTaxAccounts = new ArrayList<>();
 
   public Double getQuantity() { return quantity; }
   public void setQuantity(Double quantity) { this.quantity = quantity; }
@@ -30,6 +31,8 @@ public class InvoiceItem {
   public void setComplement(String complement) { this.complement = complement; }
   public List<InvoiceItemPart> getParts() { return parts; }
   public void setParts(List<InvoiceItemPart> parts) { this.parts = parts; }
-  public String getPropertyTaxAccount() { return propertyTaxAccount; }
-  public void setPropertyTaxAccount(String propertyTaxAccount) { this.propertyTaxAccount = propertyTaxAccount; }
+  @JsonProperty("property_tax_account")
+  public List<String> getPropertyTaxAccounts() { return propertyTaxAccounts; }
+  @JsonProperty("property_tax_account")
+  public void setPropertyTaxAccounts(List<String> propertyTaxAccounts) { this.propertyTaxAccounts = propertyTaxAccounts; }
 }
