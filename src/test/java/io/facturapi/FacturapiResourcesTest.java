@@ -207,6 +207,98 @@ class FacturapiResourcesTest {
   }
 
   @Test
+  void invoiceZipRequestCanBeCreated() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"zip_1\",\"status\":\"pending\"}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var response = sdk.invoices().createZipRequest(
+      Map.of(
+        "year", 2025,
+        "month", 3,
+        "issuer_type", "issuing",
+        "invoice_types", java.util.List.of("I", "E")
+      )
+    );
+
+    assertEquals("zip_1", response.get("id"));
+    var request = httpClient.requests().get(0);
+    assertEquals("POST", request.method());
+    assertEquals("/v2/invoices/zip-requests", request.uri().getPath());
+    assertTrue(request.bodyUtf8().contains("\"issuer_type\":\"issuing\""));
+  }
+
+  @Test
+  void invoiceZipRequestsCanBeListed() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(
+      200,
+      "{\"page\":1,\"total_pages\":1,\"total_results\":1,\"data\":[{\"id\":\"zip_1\"}]}"
+    );
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var response = sdk.invoices().listZipRequests(
+      Map.of("year", 2025, "month", 3, "status", "finished", "limit", 20, "page", 1)
+    );
+
+    assertEquals("zip_1", response.getData().get(0).get("id"));
+    var request = httpClient.requests().get(0);
+    assertEquals("GET", request.method());
+    assertEquals("/v2/invoices/zip-requests", request.uri().getPath());
+    assertTrue(request.uri().getQuery().contains("year=2025"));
+    assertTrue(request.uri().getQuery().contains("status=finished"));
+  }
+
+  @Test
+  void invoiceZipRequestCanBeRetrieved() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"zip_1\",\"status\":\"finished\"}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var response = sdk.invoices().retrieveZipRequest("zip_1");
+
+    assertEquals("finished", response.get("status"));
+    var request = httpClient.requests().get(0);
+    assertEquals("GET", request.method());
+    assertEquals("/v2/invoices/zip-requests/zip_1", request.uri().getPath());
+  }
+
+  @Test
+  void invoiceZipRequestCanBeDownloaded() throws Exception {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueBinary(200, "ZIP-CONTENT".getBytes(StandardCharsets.UTF_8), "application/zip");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    try (InputStream stream = sdk.invoices().downloadZipRequest("zip_1")) {
+      assertEquals("ZIP-CONTENT", new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+    }
+
+    var request = httpClient.requests().get(0);
+    assertEquals("GET", request.method());
+    assertEquals("/v2/invoices/zip-requests/zip_1/zip", request.uri().getPath());
+  }
+
+  @Test
   void organizationUploadsAcceptBytes() {
     StubHttpClient httpClient = new StubHttpClient();
     httpClient.enqueueJson(200, "{\"id\":\"org_1\"}");

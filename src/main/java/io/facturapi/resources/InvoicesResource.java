@@ -143,6 +143,63 @@ public class InvoicesResource extends BaseResource {
   }
 
   /**
+   * Creates a ZIP request or returns the existing request for the same criteria.
+   *
+   * @param data ZIP request criteria.
+   * @return ZIP request data.
+   * @see <a href="https://docs.facturapi.io/api#tag/Invoices">API reference</a>
+   */
+  public Map<String, Object> createZipRequest(Map<String, Object> data) {
+    return post(
+      "/invoices/zip-requests",
+      data,
+      null,
+      new TypeReference<Map<String, Object>>() {}
+    );
+  }
+
+  /**
+   * Gets a paginated list of ZIP requests.
+   *
+   * @param params Search and pagination parameters.
+   * @return Paginated ZIP request result.
+   * @see <a href="https://docs.facturapi.io/api#tag/Invoices">API reference</a>
+   */
+  public SearchResult<Map<String, Object>> listZipRequests(Map<String, ?> params) {
+    return get(
+      "/invoices/zip-requests",
+      params,
+      new TypeReference<SearchResult<Map<String, Object>>>() {}
+    );
+  }
+
+  /**
+   * Gets a ZIP request by id.
+   *
+   * @param id ZIP request id.
+   * @return ZIP request data.
+   * @see <a href="https://docs.facturapi.io/api#tag/Invoices">API reference</a>
+   */
+  public Map<String, Object> retrieveZipRequest(String id) {
+    return get(
+      "/invoices/zip-requests/" + id,
+      null,
+      new TypeReference<Map<String, Object>>() {}
+    );
+  }
+
+  /**
+   * Downloads the ZIP generated for a request.
+   *
+   * @param id ZIP request id.
+   * @return ZIP stream. Caller owns closing it.
+   * @see <a href="https://docs.facturapi.io/api#tag/Invoices">API reference</a>
+   */
+  public InputStream downloadZipRequest(String id) {
+    return client.getStream("/invoices/zip-requests/" + id + "/zip");
+  }
+
+  /**
    * Downloads the cancellation receipt XML file.
    *
    * @param id Invoice id.
