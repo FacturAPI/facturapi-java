@@ -29,14 +29,14 @@ Maven:
 <dependency>
   <groupId>io.facturapi</groupId>
   <artifactId>facturapi-java</artifactId>
-  <version>1.3.1</version>
+  <version>1.3.0</version>
 </dependency>
 ```
 
 Gradle:
 
 ```gradle
-implementation("io.facturapi:facturapi-java:1.3.1")
+implementation("io.facturapi:facturapi-java:1.3.0")
 ```
 
 ## Inicio rápido
