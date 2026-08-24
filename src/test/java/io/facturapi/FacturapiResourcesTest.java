@@ -16,10 +16,12 @@ import io.facturapi.enums.TaxType;
 import io.facturapi.enums.Taxability;
 import io.facturapi.http.FacturapiConfig;
 import io.facturapi.models.Customer;
+import io.facturapi.models.InvoiceItem;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -204,6 +206,98 @@ class FacturapiResourcesTest {
     var listRequest = httpClient.requests().get(1);
     assertEquals("GET", listRequest.method());
     assertEquals("/v2/retentions?status=draft", listRequest.uri().getPath() + "?" + listRequest.uri().getQuery());
+  }
+
+  @Test
+  void invoiceZipRequestCanBeCreated() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"zip_1\",\"status\":\"pending\"}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var response = sdk.invoices().createZipRequest(
+      Map.of(
+        "year", 2025,
+        "month", 3,
+        "issuer_type", "issuing",
+        "invoice_types", java.util.List.of("I", "E")
+      )
+    );
+
+    assertEquals("zip_1", response.get("id"));
+    var request = httpClient.requests().get(0);
+    assertEquals("POST", request.method());
+    assertEquals("/v2/invoices/zip-requests", request.uri().getPath());
+    assertTrue(request.bodyUtf8().contains("\"issuer_type\":\"issuing\""));
+  }
+
+  @Test
+  void invoiceZipRequestsCanBeListed() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(
+      200,
+      "{\"page\":1,\"total_pages\":1,\"total_results\":1,\"data\":[{\"id\":\"zip_1\"}]}"
+    );
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var response = sdk.invoices().listZipRequests(
+      Map.of("year", 2025, "month", 3, "status", "finished", "limit", 20, "page", 1)
+    );
+
+    assertEquals("zip_1", response.getData().get(0).get("id"));
+    var request = httpClient.requests().get(0);
+    assertEquals("GET", request.method());
+    assertEquals("/v2/invoices/zip-requests", request.uri().getPath());
+    assertTrue(request.uri().getQuery().contains("year=2025"));
+    assertTrue(request.uri().getQuery().contains("status=finished"));
+  }
+
+  @Test
+  void invoiceZipRequestCanBeRetrieved() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"zip_1\",\"status\":\"finished\"}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var response = sdk.invoices().retrieveZipRequest("zip_1");
+
+    assertEquals("finished", response.get("status"));
+    var request = httpClient.requests().get(0);
+    assertEquals("GET", request.method());
+    assertEquals("/v2/invoices/zip-requests/zip_1", request.uri().getPath());
+  }
+
+  @Test
+  void invoiceZipRequestCanBeDownloaded() throws Exception {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueBinary(200, "ZIP-CONTENT".getBytes(StandardCharsets.UTF_8), "application/zip");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    try (InputStream stream = sdk.invoices().downloadZipRequestStream("zip_1")) {
+      assertEquals("ZIP-CONTENT", new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+    }
+
+    var request = httpClient.requests().get(0);
+    assertEquals("GET", request.method());
+    assertEquals("/v2/invoices/zip-requests/zip_1/zip", request.uri().getPath());
   }
 
   @Test
@@ -413,5 +507,19 @@ class FacturapiResourcesTest {
     var tax = mapper.readValue("{\"type\":\"IEPS\",\"factor\":\"Exento\"}", io.facturapi.models.Tax.class);
     assertEquals(TaxType.IEPS, tax.getType());
     assertEquals(TaxFactor.EXENTO, tax.getFactor());
+  }
+
+  @Test
+  void objectMapperDeserializesPropertyTaxAccountsAsArrays() throws Exception {
+    var mapper = FacturapiConfig.builder("sk_test").build().getObjectMapper();
+
+    var empty = mapper.readValue("{\"property_tax_account\":[]}", InvoiceItem.class);
+    var accounts = mapper.readValue(
+      "{\"property_tax_account\":[\"0102030405\"]}",
+      InvoiceItem.class
+    );
+
+    assertEquals(List.of(), empty.getPropertyTaxAccounts());
+    assertEquals(List.of("0102030405"), accounts.getPropertyTaxAccounts());
   }
 }
