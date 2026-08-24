@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add draft support methods for retentions: `retentions.updateDraft(String id, Map<String, Object> data)`, `retentions.copyToDraft(String id)`, `retentions.stampDraft(String id)`, and `retentions.cancel(String id)`.
 
+- Add `invoices.createZipRequest(Map<String, Object> data)` for `POST /invoices/zip-requests`.
+- Add `invoices.listZipRequests(Map<String, ?> params)` for `GET /invoices/zip-requests`.
+- Add `invoices.retrieveZipRequest(String id)` for `GET /invoices/zip-requests/{id}`.
+- Add `invoices.downloadZipRequestStream(String id)` for streaming `GET /invoices/zip-requests/{id}/zip`.
+
 ## [1.3.0] - 2026-06-07
 
 ### Added
