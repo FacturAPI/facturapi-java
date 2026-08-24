@@ -195,7 +195,7 @@ public class InvoicesResource extends BaseResource {
    * @return ZIP stream. Caller owns closing it.
    * @see <a href="https://docs.facturapi.io/api#tag/Invoices">API reference</a>
    */
-  public InputStream downloadZipRequest(String id) {
+  public InputStream downloadZipRequestStream(String id) {
     return client.getStream("/invoices/zip-requests/" + id + "/zip");
   }
 

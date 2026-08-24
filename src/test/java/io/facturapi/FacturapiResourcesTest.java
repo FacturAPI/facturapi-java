@@ -289,7 +289,7 @@ class FacturapiResourcesTest {
         .build()
     );
 
-    try (InputStream stream = sdk.invoices().downloadZipRequest("zip_1")) {
+    try (InputStream stream = sdk.invoices().downloadZipRequestStream("zip_1")) {
       assertEquals("ZIP-CONTENT", new String(stream.readAllBytes(), StandardCharsets.UTF_8));
     }
 

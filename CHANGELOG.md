@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `invoices.createZipRequest(Map<String, Object> data)` for `POST /invoices/zip-requests`.
 - Add `invoices.listZipRequests(Map<String, ?> params)` for `GET /invoices/zip-requests`.
 - Add `invoices.retrieveZipRequest(String id)` for `GET /invoices/zip-requests/{id}`.
-- Add `invoices.downloadZipRequest(String id)` for streaming `GET /invoices/zip-requests/{id}/zip`.
+- Add `invoices.downloadZipRequestStream(String id)` for streaming `GET /invoices/zip-requests/{id}/zip`.
 
 ## [1.3.0] - 2026-06-07
 
