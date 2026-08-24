@@ -113,6 +113,100 @@ class FacturapiResourcesTest {
   }
 
   @Test
+  void retentionDraftCreateSupportsDraftStatus() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"ret_draft_1\",\"status\":\"draft\"}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    Map<String, Object> payload = new java.util.HashMap<>();
+    payload.put("status", "draft");
+    payload.put("customer", null);
+
+    var response = sdk.retentions().create(payload);
+
+    assertEquals("ret_draft_1", response.getId());
+    assertEquals("draft", response.getStatus());
+    var request = httpClient.requests().get(0);
+    assertEquals("POST", request.method());
+    assertEquals("/v2/retentions", request.uri().getPath());
+    assertTrue(request.bodyUtf8().contains("\"status\":\"draft\""));
+    assertTrue(request.bodyUtf8().contains("\"customer\":null"));
+  }
+
+  @Test
+  void retentionDraftUpdateUsesExpectedPath() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"ret_1\",\"folio_int\":\"R-2026-001\"}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var response = sdk.retentions().updateDraft("ret_1", Map.of("folio_int", "R-2026-001"));
+
+    assertEquals("ret_1", response.getId());
+    assertEquals("R-2026-001", response.getFolioInt());
+    var request = httpClient.requests().get(0);
+    assertEquals("PUT", request.method());
+    assertEquals("/v2/retentions/ret_1", request.uri().getPath());
+    assertTrue(request.bodyUtf8().contains("\"folio_int\":\"R-2026-001\""));
+  }
+
+  @Test
+  void retentionDraftCopyAndStampUseExpectedPaths() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"ret_copy_1\",\"status\":\"draft\"}");
+    httpClient.enqueueJson(200, "{\"id\":\"ret_1\",\"status\":\"valid\"}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var draft = sdk.retentions().copyToDraft("ret_1");
+    var stamped = sdk.retentions().stampDraft("ret_copy_1");
+
+    assertEquals("ret_copy_1", draft.getId());
+    assertEquals("ret_1", stamped.getId());
+    assertEquals("POST", httpClient.requests().get(0).method());
+    assertEquals("/v2/retentions/ret_1/copy", httpClient.requests().get(0).uri().getPath());
+    assertEquals("POST", httpClient.requests().get(1).method());
+    assertEquals("/v2/retentions/ret_copy_1/stamp", httpClient.requests().get(1).uri().getPath());
+  }
+
+  @Test
+  void retentionDraftCancelAndListUseExpectedPaths() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"id\":\"ret_draft_1\",\"status\":\"canceled\"}");
+    httpClient.enqueueJson(200, "{\"data\":[{\"id\":\"ret_draft_2\",\"status\":\"draft\"}]}");
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var deleted = sdk.retentions().cancel("ret_draft_1");
+    var drafts = sdk.retentions().list(Map.of("status", "draft"));
+
+    assertEquals("ret_draft_1", deleted.getId());
+    assertEquals(1, drafts.getData().size());
+    assertEquals("DELETE", httpClient.requests().get(0).method());
+    assertEquals("/v2/retentions/ret_draft_1", httpClient.requests().get(0).uri().getPath());
+    var listRequest = httpClient.requests().get(1);
+    assertEquals("GET", listRequest.method());
+    assertEquals("/v2/retentions?status=draft", listRequest.uri().getPath() + "?" + listRequest.uri().getQuery());
+  }
+
+  @Test
   void organizationUploadsAcceptBytes() {
     StubHttpClient httpClient = new StubHttpClient();
     httpClient.enqueueJson(200, "{\"id\":\"org_1\"}");
