@@ -47,6 +47,36 @@ class FacturapiResourcesTest {
   }
 
   @Test
+  void invoicePaymentSummaryUsesExpectedPath() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(
+      200,
+      "{\"uuid\":\"6CF6CE33-1BD2-4F88-A443-33013C069169\",\"installment\":1,"
+        + "\"last_balance\":100,\"total\":100,\"currency\":\"MXN\",\"amount\":58,"
+        + "\"taxes\":[{\"base\":50,\"rate\":0.16,\"type\":\"IVA\",\"factor\":\"Tasa\",\"withholding\":false}]}"
+    );
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var response = sdk.invoices().paymentSummary("inv_1", 58.0);
+
+    assertEquals("6CF6CE33-1BD2-4F88-A443-33013C069169", response.getUuid());
+    assertEquals(1, response.getInstallment());
+    assertEquals(50.0, response.getTaxes().get(0).getBase());
+
+    var request = httpClient.requests().get(0);
+    assertEquals("GET", request.method());
+    assertEquals(
+      "/v2/invoices/inv_1/payment-summary?amount=58.0",
+      request.uri().getPath() + "?" + request.uri().getQuery()
+    );
+  }
+
+  @Test
   void receiptsToInvoiceUsesExpectedPath() {
     StubHttpClient httpClient = new StubHttpClient();
     httpClient.enqueueJson(200, "{\"id\":\"inv_multi_1\"}");
