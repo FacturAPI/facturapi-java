@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.facturapi.http.FacturapiHttpClient;
 import io.facturapi.models.GenericResponse;
 import io.facturapi.models.Invoice;
+import io.facturapi.models.PaymentSummary;
 import io.facturapi.models.SearchResult;
 import java.io.InputStream;
 import java.util.Map;
@@ -50,6 +51,22 @@ public class InvoicesResource extends BaseResource {
    */
   public Invoice retrieve(String id) {
     return get("/invoices/" + id, null, Invoice.class);
+  }
+
+  /**
+   * Gets the information needed to add this invoice as a related document in a
+   * payment complement (complemento de pago): the installment number according
+   * to the payment history, the previous balance, and the invoice tax breakdown
+   * prorated to the amount being paid.
+   *
+   * @param id Invoice id.
+   * @param amount Amount being paid, expressed in the invoice currency. Cannot
+   *        exceed the outstanding balance.
+   * @return Payment summary ready to be used as a related document.
+   * @see <a href="https://docs.facturapi.io/api#operation/getInvoicePaymentSummary">API reference</a>
+   */
+  public PaymentSummary paymentSummary(String id, double amount) {
+    return get("/invoices/" + id + "/payment-summary", Map.of("amount", amount), PaymentSummary.class);
   }
 
   /**
