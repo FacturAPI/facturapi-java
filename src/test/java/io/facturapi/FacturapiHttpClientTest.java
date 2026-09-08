@@ -17,9 +17,13 @@ class FacturapiHttpClientTest {
     StubHttpClient httpClient = new StubHttpClient();
     httpClient.enqueueJson(200, "{\"ok\":true}");
 
+    var builder = httpClient.client().newBuilder();
+    builder.interceptors().add(0, chain -> chain.proceed(
+      chain.request().newBuilder().header("Accept-Language", "en-US").build()
+    ));
     FacturapiHttpClient client = new FacturapiHttpClient(
       FacturapiConfig.builder("sk_test_123")
-        .httpClient(httpClient.client())
+        .httpClient(builder.build())
         .build()
     );
 
@@ -28,6 +32,7 @@ class FacturapiHttpClientTest {
 
     var request = httpClient.requests().get(0);
     assertEquals("Bearer sk_test_123", request.headers().firstValue("Authorization").orElse(""));
+    assertEquals("en-US", request.headers().firstValue("Accept-Language").orElse(""));
     assertEquals("POST", request.method());
     assertEquals("/v2/invoices?page=1", request.uri().getPath() + "?" + request.uri().getQuery());
   }

@@ -116,12 +116,41 @@ Facturapi facturapi = Facturapi.builder("sk_test_...")
 Para pruebas o configuraciones avanzadas, puedes inyectar tu propio `OkHttpClient`:
 
 ```java
+import io.facturapi.http.FacturapiConfig;
 import okhttp3.OkHttpClient;
 
-Facturapi facturapi = Facturapi.builder("sk_test_...")
-  .httpClient(new OkHttpClient())
-  .build();
+Facturapi facturapi = new Facturapi(
+  FacturapiConfig.builder("sk_test_...")
+    .httpClient(new OkHttpClient())
+    .build());
 ```
+
+## Idioma de los errores de la API
+
+En API V2 puedes solicitar mensajes de error en inglés con `Accept-Language`. Usa la configuración existente del cliente:
+
+```java
+import io.facturapi.Facturapi;
+import io.facturapi.http.FacturapiConfig;
+import java.time.Duration;
+import okhttp3.OkHttpClient;
+
+OkHttpClient httpClient = new OkHttpClient.Builder()
+    .connectTimeout(Duration.ofSeconds(30))
+    .callTimeout(Duration.ofSeconds(30))
+    .addInterceptor(chain -> chain.proceed(
+        chain.request().newBuilder()
+            .header("Accept-Language", "en")
+            .build()))
+    .build();
+
+Facturapi facturapi = new Facturapi(
+    FacturapiConfig.builder("YOUR_API_KEY")
+        .httpClient(httpClient)
+        .build());
+```
+
+Usa `es` para español. También se aceptan variantes como `en-US` y preferencias como `en;q=0.9, es;q=0.5`. Sin el header o sin un idioma compatible, la API usa español. La preferencia se aplica a todas las solicitudes de esta instancia; usa instancias separadas si necesitas varios idiomas. Los códigos no cambian y los mensajes externos SAT/PAC y los mensajes legacy no catalogados conservan su idioma original. La localización depende del soporte de API V2 en el servidor; no traduce errores locales del SDK.
 
 ## Documentación
 
