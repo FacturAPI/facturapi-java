@@ -12,7 +12,10 @@ public class SearchResult<T> {
   private Integer totalPages;
   @JsonAlias({"total"})
   private Integer totalResults;
+  private Boolean totalsAreCapped;
   private Boolean hasMore;
+  private String nextCursor;
+  private String previousCursor;
   private List<T> data = new ArrayList<>();
 
   public Integer getPage() {
@@ -39,12 +42,36 @@ public class SearchResult<T> {
     this.totalResults = totalResults;
   }
 
+  public Boolean getTotalsAreCapped() {
+    return totalsAreCapped;
+  }
+
+  public void setTotalsAreCapped(Boolean totalsAreCapped) {
+    this.totalsAreCapped = totalsAreCapped;
+  }
+
   public Boolean getHasMore() {
     return hasMore;
   }
 
   public void setHasMore(Boolean hasMore) {
     this.hasMore = hasMore;
+  }
+
+  public String getNextCursor() {
+    return nextCursor;
+  }
+
+  public void setNextCursor(String nextCursor) {
+    this.nextCursor = nextCursor;
+  }
+
+  public String getPreviousCursor() {
+    return previousCursor;
+  }
+
+  public void setPreviousCursor(String previousCursor) {
+    this.previousCursor = previousCursor;
   }
 
   public List<T> getData() {

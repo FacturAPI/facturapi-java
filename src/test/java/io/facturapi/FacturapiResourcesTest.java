@@ -3,6 +3,7 @@ package io.facturapi;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.facturapi.enums.CancellationStatus;
@@ -537,6 +538,29 @@ class FacturapiResourcesTest {
     var tax = mapper.readValue("{\"type\":\"IEPS\",\"factor\":\"Exento\"}", io.facturapi.models.Tax.class);
     assertEquals(TaxType.IEPS, tax.getType());
     assertEquals(TaxFactor.EXENTO, tax.getFactor());
+  }
+
+  @Test
+  void invoiceListDeserializesSearchResultPaginationMetadata() throws Exception {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(
+      200,
+      "{\"data\":[],\"total_results\":3000,\"totals_are_capped\":true,\"next_cursor\":\"next-1\",\"previous_cursor\":null}"
+    );
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var result = sdk.invoices().list(Map.of());
+
+    assertTrue(result.getTotalsAreCapped());
+    assertEquals(3000, result.getTotalResults());
+    assertEquals("next-1", result.getNextCursor());
+    assertNull(result.getPreviousCursor());
+    assertTrue(result.getData().isEmpty());
   }
 
   @Test
