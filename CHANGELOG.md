@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-09-09
+
+### Added
+
+- Expose cursor pagination and capped-total metadata on `SearchResult`: `totalsAreCapped`, `nextCursor`, and `previousCursor` so callers can follow cursor pagination and detect capped totals (page totals capped; cursor mode returns totals only on the first page).
+
+### Fixed
+
+- Serialize nested query map values with bracket notation. A date range passed as a nested `Map` (for example `date -> gte/lt`) was stringified with `Map.toString()`; values now expand to bracket keys (`date[gte]=...&date[lt]=...`).
+
 ## [2.1.0] - 2026-09-04
 
 ### Added
