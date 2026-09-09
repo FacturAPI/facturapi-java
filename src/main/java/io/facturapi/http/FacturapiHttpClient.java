@@ -345,23 +345,7 @@ public final class FacturapiHttpClient {
 
     List<String> parts = new ArrayList<>();
     for (Map.Entry<String, ?> entry : queryParams.entrySet()) {
-      String key = entry.getKey();
-      Object value = entry.getValue();
-      if (value == null) {
-        continue;
-      }
-      if (value instanceof Iterable<?>) {
-        for (Object v : (Iterable<?>) value) {
-          appendQueryPart(parts, key, v);
-        }
-      } else if (value.getClass().isArray()) {
-        int length = java.lang.reflect.Array.getLength(value);
-        for (int i = 0; i < length; i++) {
-          appendQueryPart(parts, key, java.lang.reflect.Array.get(value, i));
-        }
-      } else {
-        appendQueryPart(parts, key, value);
-      }
+      appendQueryPart(parts, entry.getKey(), entry.getValue());
     }
 
     return parts.isEmpty() ? "" : "?" + String.join("&", parts);
@@ -369,6 +353,25 @@ public final class FacturapiHttpClient {
 
   private static void appendQueryPart(List<String> parts, String key, Object value) {
     if (value == null) {
+      return;
+    }
+    if (value instanceof Map<?, ?>) {
+      for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+        appendQueryPart(parts, key + "[" + entry.getKey() + "]", entry.getValue());
+      }
+      return;
+    }
+    if (value instanceof Iterable<?>) {
+      for (Object item : (Iterable<?>) value) {
+        appendQueryPart(parts, key, item);
+      }
+      return;
+    }
+    if (value.getClass().isArray()) {
+      int length = java.lang.reflect.Array.getLength(value);
+      for (int i = 0; i < length; i++) {
+        appendQueryPart(parts, key, java.lang.reflect.Array.get(value, i));
+      }
       return;
     }
     String encodedKey = URLEncoder.encode(Objects.toString(key), StandardCharsets.UTF_8);

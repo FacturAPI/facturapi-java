@@ -2,6 +2,7 @@ package io.facturapi;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -76,6 +77,31 @@ class FacturapiHttpClientTest {
     assertEquals("required", ex.getErrors().get(0).get("code").asText());
     assertEquals("3", ex.getHeaders().get("Retry-After").get(0));
     assertEquals("log_123", ex.getHeaders().get("x-facturapi-log-id").get(0));
+  }
+
+  @Test
+  void serializesNestedDateRangeQueryWithBracketNotation() throws Exception {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(200, "{\"data\":[]}");
+
+    FacturapiHttpClient client = new FacturapiHttpClient(
+      FacturapiConfig.builder("sk_test_123")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    client.get(
+      "/invoices",
+      Map.of("limit", 100, "date", Map.of("gte", "2026-01-01", "lt", "2026-02-01")),
+      GenericResponse.class
+    );
+
+    var request = httpClient.requests().get(0);
+    String query = request.uri().getQuery();
+    assertTrue(query.contains("limit=100"));
+    assertTrue(query.contains("date[gte]=2026-01-01"));
+    assertTrue(query.contains("date[lt]=2026-02-01"));
+    assertFalse(query.contains("{gte"));
   }
 
   @Test
