@@ -17,6 +17,7 @@ import io.facturapi.resources.WebhooksResource;
 import io.facturapi.tools.CartaPorteCatalogsTool;
 import io.facturapi.tools.CatalogsTool;
 import io.facturapi.tools.ComercioExteriorCatalogsTool;
+import io.facturapi.tools.NominaCatalogsTool;
 import io.facturapi.tools.ToolsResource;
 import java.time.Duration;
 
@@ -34,6 +35,7 @@ public class Facturapi {
   private final CatalogsTool catalogs;
   private final CartaPorteCatalogsTool cartaPorteCatalogs;
   private final ComercioExteriorCatalogsTool comercioExteriorCatalogs;
+  private final NominaCatalogsTool nominaCatalogs;
   private final ToolsResource tools;
 
   /**
@@ -73,6 +75,7 @@ public class Facturapi {
     this.catalogs = new CatalogsTool(httpClient);
     this.cartaPorteCatalogs = new CartaPorteCatalogsTool(httpClient);
     this.comercioExteriorCatalogs = new ComercioExteriorCatalogsTool(httpClient);
+    this.nominaCatalogs = new NominaCatalogsTool(httpClient);
     this.tools = new ToolsResource(httpClient);
   }
 
@@ -124,6 +127,10 @@ public class Facturapi {
 
   public ComercioExteriorCatalogsTool comercioExteriorCatalogs() {
     return comercioExteriorCatalogs;
+  }
+
+  public NominaCatalogsTool nominaCatalogs() {
+    return nominaCatalogs;
   }
 
   public ToolsResource tools() {
