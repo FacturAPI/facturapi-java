@@ -62,6 +62,13 @@ var invoice = facturapi.invoices().create(Map.of(
 System.out.println(invoice.getId());
 ```
 
+## Payroll catalogs
+
+```java
+var deductions = facturapi.nominaCatalogs().searchDeductions(Map.of("q", "001"));
+var perceptions = facturapi.nominaCatalogs().searchPerceptions(Map.of("q", "001"));
+```
+
 ## Uploads
 
 ```java
