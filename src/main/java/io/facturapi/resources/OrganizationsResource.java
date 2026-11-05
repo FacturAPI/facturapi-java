@@ -14,6 +14,7 @@ import io.facturapi.models.OrganizationTeamRoleTemplate;
 import io.facturapi.models.OrganizationUserAccess;
 import io.facturapi.models.SearchResult;
 import io.facturapi.models.Series;
+import io.facturapi.models.SignedDownloadUrl;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -132,6 +133,17 @@ public class OrganizationsResource extends BaseResource {
    */
   public Organization deleteCertificate(String id) {
     return delete("/organizations/" + id + "/certificate", null, Organization.class);
+  }
+
+  /**
+   * Gets a temporary URL for downloading the signed Carta Manifiesto ZIP.
+   */
+  public SignedDownloadUrl downloadManifiestoZipUrl(String id) {
+    return get(
+      "/organizations/" + id + "/manifiesto/download-url",
+      null,
+      SignedDownloadUrl.class
+    );
   }
 
   /**
