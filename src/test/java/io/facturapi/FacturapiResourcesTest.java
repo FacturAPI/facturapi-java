@@ -373,6 +373,30 @@ class FacturapiResourcesTest {
   }
 
   @Test
+  void organizationManifiestoZipDownloadUrlIsTyped() {
+    StubHttpClient httpClient = new StubHttpClient();
+    httpClient.enqueueJson(
+      200,
+      "{\"url\":\"https://storage.googleapis.com/signed-download\",\"expires_at\":\"2030-01-01T00:00:00Z\",\"content_type\":\"application/zip\",\"filename\":\"manifiesto_AAA010101AAA.zip\"}"
+    );
+
+    Facturapi sdk = new Facturapi(
+      FacturapiConfig.builder("sk_test")
+        .httpClient(httpClient.client())
+        .build()
+    );
+
+    var response = sdk.organizations().downloadManifiestoZipUrl("org_1");
+
+    assertEquals("application/zip", response.getContentType());
+    assertEquals("manifiesto_AAA010101AAA.zip", response.getFilename());
+    assertEquals(Instant.parse("2030-01-01T00:00:00Z"), response.getExpiresAt());
+    var request = httpClient.requests().get(0);
+    assertEquals("GET", request.method());
+    assertEquals("/v2/organizations/org_1/manifiesto/download-url", request.uri().getPath());
+  }
+
+  @Test
   void sdkExposesAccessorBasedSurface() {
     StubHttpClient httpClient = new StubHttpClient();
     Facturapi sdk = new Facturapi(
